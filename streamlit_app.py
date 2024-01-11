@@ -72,7 +72,7 @@ elif tab == "Dashboard":
         st.pyplot()
 
     # Function to plot weekly sentiment analysis
-    def plot_weekly_sentiment_analysis(df, time_delta):
+    def plot_weekly_sentiment_analysis(df):
         # Weekly Sentiment Analysis
         latest_date = df['timestamp'].max()
         start_date = latest_date - timedelta(days=time_delta)
@@ -81,10 +81,10 @@ elif tab == "Dashboard":
         sentiment_counts_week = last_week_data.groupby(['day_of_week', 'sentiment']).size().unstack(fill_value=0)
         ordered_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         sentiment_counts_week = sentiment_counts_week.reindex(ordered_days).fillna(0)
-        # plot_bar_chart(sentiment_counts_week, f"Weekly Sentiment Analysis for Last {time_delta} Days", "Days of the Week")
+        plot_bar_chart(sentiment_counts_week, "Days of the Week")
 
     # Function to plot monthly sentiment analysis
-    def plot_monthly_sentiment_analysis(df, time_delta):
+    def plot_monthly_sentiment_analysis(df):
         # Monthly Sentiment Analysis
         latest_date = df['timestamp'].max()
         start_month_date = latest_date - pd.DateOffset(months=1)
@@ -93,18 +93,17 @@ elif tab == "Dashboard":
         sentiment_counts_month = last_month_data.groupby(['week_of_month', 'sentiment']).size().unstack(fill_value=0)
         all_weeks = range(1, 6)
         sentiment_counts_month = sentiment_counts_month.reindex(all_weeks).fillna(0)
-        plot_bar_chart(sentiment_counts_month, f"Monthly Sentiment Analysis for Last {time_delta} Days", "Weeks of the Month")
+        plot_bar_chart(sentiment_counts_month, "Weeks of the Month")
 
     # Function to plot 3 months sentiment analysis
-    def plot_3_months_sentiment_analysis(df, time_delta):
+    def plot_3_months_sentiment_analysis(df):
         # 3 Months Sentiment Analysis
         df['month_year'] = df['timestamp'].dt.to_period('M')
         sentiment_counts_3months = df.groupby(['month_year', 'sentiment']).size().unstack(fill_value=0).iloc[-3:]
-        plot_bar_chart(sentiment_counts_3months, f"3 Months Sentiment Analysis for Last {time_delta} Days", "Month")
+        plot_bar_chart(sentiment_counts_3months, "Month")
 
     # Function to plot bar chart
-    def plot_bar_chart(data, title, xlabel):
-        st.subheader(title)
+    def plot_bar_chart(data, xlabel):
         plt.figure(figsize=(10, 6))
         bar_width = 0.2
         index = np.arange(len(data))
@@ -121,11 +120,11 @@ elif tab == "Dashboard":
 
     with col2:
         if time_delta_option == "1 week":
-            plot_weekly_sentiment_analysis(df, time_delta)  # Define this function
+            plot_weekly_sentiment_analysis(df)  # Define this function
         elif time_delta_option == "1 month":
-            plot_monthly_sentiment_analysis(df, time_delta)  # Define this function
+            plot_monthly_sentiment_analysis(df)  # Define this function
         else:
-            plot_3_months_sentiment_analysis(df, time_delta)  # Define this function
+            plot_3_months_sentiment_analysis(df)  # Define this function
 
     from pandas.tseries.offsets import DateOffset
     import matplotlib.dates as mdates
