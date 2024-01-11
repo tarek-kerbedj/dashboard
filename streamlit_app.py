@@ -14,16 +14,15 @@ st.title("Chat Data Analysis")
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
-# Create tabs for DataFrame and Graphs
-data_tab, graphs_tab = st.tabs(["Chat Data", "Graphs"])
+# Create a sidebar with radio buttons for navigation
+tab = st.sidebar.radio("Navigation", ["Chat Data", "Graphs"])
 
-# In the Data tab, display the Chat Data DataFrame
-with data_tab:
+# Depending on the selected tab, display content
+if tab == "Chat Data":
     st.subheader("Chat")
     st.write(df.sort_values(by='timestamp', ascending=False))
 
-# In the Graphs tab, display the various graphs
-with graphs_tab:
+elif tab == "Graphs":
     # Define function to create heatmap for given time delta
     def create_heatmap(df, time_delta):
         # Filter data for the specified time period
