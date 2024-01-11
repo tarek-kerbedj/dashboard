@@ -127,11 +127,8 @@ def line_graph_latest_3_months(df):
 # Start of Streamlit UI
 st.sidebar.image(logo, width=300)
 
-# Custom CSS
-st.markdown(
-    '<style>' + open('./styles.css').read() + '</style>',
-    unsafe_allow_html=True
-)
+with open('./styles.css') as f:
+    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 # Sidebar navigation with state
 if 'current_tab' not in st.session_state:

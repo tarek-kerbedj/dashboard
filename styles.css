@@ -16,3 +16,31 @@
     font-size:30px !important;
     font-weight: bold;
 }
+
+/* Custom styles for the sidebar buttons */
+button.css-1r6slb0 {
+    border: 2px solid #4CAF50; /* Green border */
+    color: black;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 8px; /* Rounded corners */
+    width: 90%; /* Width of the button */
+    background-color: white; /* White background */
+}
+
+/* Hover effect for buttons */
+button.css-1r6slb0:hover {
+    background-color: #ddd; /* Add a grey background on hover */
+}
+
+/* Active/current button */
+button.css-1r6slb0:active {
+    background-color: #4CAF50; /* Green background for active button */
+    color: white;
+}
+
