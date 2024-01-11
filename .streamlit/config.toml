@@ -1,0 +1,32 @@
+# .streamlit/config.toml
+
+[general]
+# Set the title of your Streamlit app
+app_title = "My Chat Data Analysis App"
+
+# Set the base URL of your Streamlit app (if deploying on a server)
+# base_url = "http://your-server-url.com/myapp"
+
+# Customize the Streamlit theme
+[theme]
+primaryColor = "#ff0000"
+backgroundColor = "#F4F4F4"
+secondaryBackgroundColor = "#F0F2F6"
+textColor = "#262730"
+base="light"
+font = "serif"
+
+# Set a custom page icon (favicon)
+[server]
+favicon = "path/to/favicon.ico"
+maxWidth = 1200
+
+# Configure Streamlit caching options
+[global]
+caching = true
+
+# Set the Streamlit port (default is 8501)
+# port = 8501
+
+# Set the Streamlit server address (default is "localhost")
+# host = "localhost"
