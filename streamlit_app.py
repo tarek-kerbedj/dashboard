@@ -10,6 +10,10 @@ from pandas.tseries.offsets import DateOffset
 from datetime import timedelta
 from google.cloud import storage
 
+import pkg_resources
+installed_packages = {d.project_name: d.version for d in pkg_resources.working_set}
+print(installed_packages['google-cloud-storage'])
+
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials/petair-408107-be3d24f00988.json"
 
 def load_data_from_gcs(bucket_name, source_blob_name):
