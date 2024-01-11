@@ -19,12 +19,18 @@ st.sidebar.image(logo, use_column_width=True)
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
-# Depending on the selected tab, display content
+# Sidebar navigation with buttons
 if st.sidebar.button("Conversation"):
+    st.session_state['current_tab'] = 'Conversation'
+if st.sidebar.button("Dashboard"):
+    st.session_state['current_tab'] = 'Dashboard'
+
+# Depending on the selected tab, display content
+if st.session_state['current_tab'] == 'Conversation':
     st.subheader("Chat")
     st.write(df.sort_values(by='timestamp', ascending=False))
 
-elif st.sidebar.button("Dashboard"):
+elif st.session_state['current_tab'] == 'Dashboard':
     # Define function to create heatmap for given time delta
     def create_heatmap(df, time_delta):
         # Filter data for the specified time period
