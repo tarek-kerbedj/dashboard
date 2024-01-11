@@ -48,7 +48,7 @@ def plot_weekly_sentiment_analysis(df, time_delta):
     start_date = latest_date - timedelta(days=time_delta)
     last_week_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= latest_date)]
     last_week_data['day_of_week'] = last_week_data['timestamp'].dt.day_name()
-    sentiment_counts_week = last_week_data.groupby(['day_of_week', 'sentiment']).size().unstack(fill_value=0)
+    sentiment_counts_week = last_week_data.groupby(['day_of_week', 'sentiment']).size().unstack()
     ordered_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     sentiment_counts_week = sentiment_counts_week.reindex(ordered_days).fillna(0)
     plot_bar_chart(sentiment_counts_week, "Days of the Week")
@@ -60,7 +60,7 @@ def plot_monthly_sentiment_analysis(df):
     start_month_date = latest_date - pd.DateOffset(months=1)
     last_month_data = df[(df['timestamp'] >= start_month_date) & (df['timestamp'] <= latest_date)]
     last_month_data['week_of_month'] = last_month_data['timestamp'].apply(lambda x: (x.day - 1) // 7 + 1)
-    sentiment_counts_month = last_month_data.groupby(['week_of_month', 'sentiment']).size().unstack(fill_value=0)
+    sentiment_counts_month = last_month_data.groupby(['week_of_month', 'sentiment']).size().unstack()
     all_weeks = range(1, 6)
     sentiment_counts_month = sentiment_counts_month.reindex(all_weeks).fillna(0)
     plot_bar_chart(sentiment_counts_month, "Weeks of the Month")
@@ -69,7 +69,7 @@ def plot_monthly_sentiment_analysis(df):
 def plot_3_months_sentiment_analysis(df):
     # 3 Months Sentiment Analysis
     df['month_year'] = df['timestamp'].dt.to_period('M')
-    sentiment_counts_3months = df.groupby(['month_year', 'sentiment']).size().unstack(fill_value=0).iloc[-3:]
+    sentiment_counts_3months = df.groupby(['month_year', 'sentiment']).size().unstack().iloc[-3:]
     plot_bar_chart(sentiment_counts_3months, "Month")
 
 # Function for line graph of the latest week with days of the week
@@ -95,7 +95,7 @@ def line_graph_latest_month(df):
     start_date = end_date - DateOffset(months=1)
     month_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
     month_data['week_of_month'] = month_data['timestamp'].apply(lambda x: (x.day - 1) // 7 + 1)
-    weekly_counts = month_data.groupby('week_of_month').size().reindex(range(1, 6), fill_value=0)
+    weekly_counts = month_data.groupby('week_of_month').size().reindex(range(1, 6))
 
     plt.figure(figsize=(10, 6))
     sns.lineplot(x=weekly_counts.index, y=weekly_counts.values, marker='o')
