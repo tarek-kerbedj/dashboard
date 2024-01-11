@@ -10,7 +10,7 @@ app_title = "My Chat Data Analysis App"
 # Customize the Streamlit theme
 [theme]
 primaryColor = "#ff0000"
-backgroundColor = "#F4F4F4"
+backgroundColor = "#FFFFFF"
 secondaryBackgroundColor = "#F0F2F6"
 textColor = "#262730"
 base="light"
@@ -19,7 +19,6 @@ font = "serif"
 # Set a custom page icon (favicon)
 [server]
 favicon = "path/to/favicon.ico"
-maxWidth = 1500
 
 # Configure Streamlit caching options
 [global]
