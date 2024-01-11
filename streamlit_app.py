@@ -127,18 +127,20 @@ def line_graph_latest_3_months(df):
 # Start of Streamlit UI
 st.sidebar.image(logo, width=300)
 
-with open('./styles.css') as f:
-    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+# Adding a title or some text to the sidebar
+st.sidebar.title("Navigation")
+st.sidebar.markdown("---")
 
-# Sidebar navigation with state
-if 'current_tab' not in st.session_state:
+# Sidebar navigation with buttons styled as a menu
+if st.sidebar.button("🏠 Dashboard"):
     st.session_state['current_tab'] = 'Dashboard'
-
-if st.sidebar.button("Conversation"):
+if st.sidebar.button("💬 Conversation"):
     st.session_state['current_tab'] = 'Conversation'
 
-if st.sidebar.button("Dashboard"):
-    st.session_state['current_tab'] = 'Dashboard'
+st.sidebar.markdown("---")
+# Additional sidebar content
+st.sidebar.markdown("## About")
+st.sidebar.info("This app provides an interactive analysis of chat data. You can navigate between different views using the buttons above.")
 
 # Main page layout
 if st.session_state['current_tab'] == 'Conversation':
