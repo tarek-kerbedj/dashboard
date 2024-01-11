@@ -124,6 +124,22 @@ def line_graph_latest_3_months(df):
     plt.grid(True)
     st.pyplot()
 
+# Function to plot bar chart
+def plot_bar_chart(data, xlabel):
+    plt.figure(figsize=(10, 6))
+    bar_width = 0.2
+    index = np.arange(len(data))
+
+    for i, sentiment in enumerate(data.columns):
+        plt.bar(index + i * bar_width, data[sentiment], bar_width, label=f'{sentiment.capitalize()}')
+
+    plt.xlabel(xlabel)
+    plt.ylabel('Percentage')
+    plt.xticks(index + bar_width, data.index)
+    plt.legend()
+    plt.tight_layout()
+    st.pyplot()
+
 # Start of Streamlit UI
 st.sidebar.image(logo, width=300)
 
@@ -170,22 +186,6 @@ elif st.session_state['current_tab'] == 'Dashboard':
         create_heatmap(df, time_delta)  # You should define this function before using it
         st.pyplot()
 
-    # Function to plot bar chart
-    def plot_bar_chart(data, xlabel):
-        plt.figure(figsize=(10, 6))
-        bar_width = 0.2
-        index = np.arange(len(data))
-
-        for i, sentiment in enumerate(data.columns):
-            plt.bar(index + i * bar_width, data[sentiment], bar_width, label=f'{sentiment.capitalize()}')
-
-        plt.xlabel(xlabel)
-        plt.ylabel('Percentage')
-        plt.xticks(index + bar_width, data.index)
-        plt.legend()
-        plt.tight_layout()
-        st.pyplot()
-
     with col2:
         if time_delta_option == "1 week":
             plot_weekly_sentiment_analysis(df)  # Define this function
@@ -194,10 +194,11 @@ elif st.session_state['current_tab'] == 'Dashboard':
         else:
             plot_3_months_sentiment_analysis(df)  # Define this function
 
-    # Display the line graph
-    if time_delta_option == "1 week":
-        line_graph_latest_week(df)  # Define this function
-    elif time_delta_option == "1 month":
-        line_graph_latest_month(df)  # Define this function
-    else:
-        line_graph_latest_3_months(df)  # Define this function
+    with col3:
+        # Display the line graph
+        if time_delta_option == "1 week":
+            line_graph_latest_week(df)  # Define this function
+        elif time_delta_option == "1 month":
+            line_graph_latest_month(df)  # Define this function
+        else:
+            line_graph_latest_3_months(df)  # Define this function
