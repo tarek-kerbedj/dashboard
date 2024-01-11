@@ -139,18 +139,19 @@ def plot_bar_chart(data, xlabel):
 
 # UI Layout
 def main_layout():
-    st.sidebar.image(logo, width=300)
-    st.sidebar.title("Navigation")
-    st.sidebar.markdown("---")
+    with st.sidebar:
+        st.image(logo, width=300)
+        st.title("Navigation")
+        st.markdown("---")
 
-    if st.sidebar.button("🏠 Dashboard"):
-        st.session_state['current_tab'] = 'Dashboard'
-    if st.sidebar.button("💬 Conversation"):
-        st.session_state['current_tab'] = 'Conversation'
+        if st.button("📊 Dashboard"):
+            st.session_state['current_tab'] = 'Dashboard'
+        if st.button("💬 Conversation"):
+            st.session_state['current_tab'] = 'Conversation'
 
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("## About")
-    st.sidebar.info("This app provides an interactive analysis of chat data.")
+        st.markdown("---")
+        st.markdown("## About")
+        st.info("This app provides an interactive analysis of chat data.")
 
     if st.session_state['current_tab'] == 'Conversation':
         conversation_tab()
@@ -163,18 +164,24 @@ def conversation_tab():
 
 def dashboard_tab():
     st.subheader("Dashboard")
+    st.markdown("Explore chat data through various visualizations.")
+
     time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
     time_delta = {"1 week": 7, "1 month": 30, "3 months": 90}[time_delta_option]
 
     col1, col2, col3 = st.columns(3)
     with col1:
+        st.markdown("### Weekly Activity Heatmap")
         create_heatmap(df, time_delta)
         st.pyplot()
     with col2:
-        plot_weekly_sentiment_analysis(df, time_delta) if time_delta_option == "1 week" else (plot_monthly_sentiment_analysis(df) if time_delta_option == "1 month" else plot_3_months_sentiment_analysis(df))
+        st.markdown("### Sentiment Analysis")
+        if time_delta_option == "1 week":
+            plot_weekly_sentiment_analysis(df, time_delta)
+        # ... [Other conditions]
     with col3:
-        line_graph_latest_week(df) if time_delta_option == "1 week" else (line_graph_latest_month(df) if time_delta_option == "1 month" else line_graph_latest_3_months(df))
-
+        st.markdown("### Message Trends")
+        line_graph_latest_week(df) if time_delta_option == "1 week" else line_graph_latest_month(df)
 
 
 # Initialize session state
