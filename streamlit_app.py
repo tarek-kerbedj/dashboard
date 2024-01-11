@@ -125,7 +125,7 @@ def line_graph_latest_3_months(df):
     st.pyplot()
 
 # Start of Streamlit UI
-st.sidebar.image(logo, width=200)
+st.sidebar.image(logo, width=300)
 
 # Custom CSS
 st.markdown(
