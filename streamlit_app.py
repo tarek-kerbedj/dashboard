@@ -15,14 +15,14 @@ st.title("Chat Data Analysis")
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # Create a sidebar with radio buttons for navigation
-tab = st.sidebar.radio("Navigation", ["Chat Data", "Graphs"])
+tab = st.sidebar.radio("Navigation", ["Conversation", "Dashboard"])
 
 # Depending on the selected tab, display content
-if tab == "Chat Data":
+if tab == "Conversation":
     st.subheader("Chat")
     st.write(df.sort_values(by='timestamp', ascending=False))
 
-elif tab == "Graphs":
+elif tab == "Dashboard":
     # Define function to create heatmap for given time delta
     def create_heatmap(df, time_delta):
         # Filter data for the specified time period
@@ -67,7 +67,7 @@ elif tab == "Graphs":
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader(f"Weekly Activity Heatmap for Last {time_delta} Days")
+        # st.subheader(f"Weekly Activity Heatmap for Last {time_delta} Days")
         create_heatmap(df, time_delta)  # You should define this function before using it
         st.pyplot()
 
@@ -118,8 +118,6 @@ elif tab == "Graphs":
         plt.legend()
         plt.tight_layout()
         st.pyplot()
-
-    st.subheader(f"Sentiment Analysis")
 
     with col2:
         if time_delta_option == "1 week":
@@ -183,7 +181,7 @@ elif tab == "Graphs":
         st.pyplot()
 
     # Display the line graph
-    st.subheader("Line Graph Analysis")
+    # st.subheader("Line Graph Analysis")
     if time_delta_option == "1 week":
         line_graph_latest_week(df)  # Define this function
     elif time_delta_option == "1 month":
