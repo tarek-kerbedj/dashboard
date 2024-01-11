@@ -7,9 +7,24 @@ import matplotlib.dates as mdates
 from PIL import Image
 from pandas.tseries.offsets import DateOffset
 from datetime import timedelta
+from google.cloud import storage
 
-# Load data from CSV
-df = pd.read_csv('chat_data.csv')
+gcs_key_content = st.secrets["gcs_key"]
+
+# Load data
+def load_data_from_gcs(bucket_name, blob_name):
+    # Create a storage client
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+
+    # Access the blob
+    blob = bucket.blob(blob_name)
+    data = blob.download_as_string()
+
+    # Convert to DataFrame
+    return pd.read_csv(pd.compat.StringIO(data.decode('utf-8')))
+
+df = load_data_from_gcs('chat_message_log', 'chat_data.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
 # Define function to create heatmap for given time delta
