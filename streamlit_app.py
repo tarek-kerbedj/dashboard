@@ -13,11 +13,16 @@ df['timestamp'] = pd.to_datetime(df['timestamp'])
 # Load your company logo
 logo = Image.open('./devan&company.png')
 
-header = st.columns([1,8])
+# Create a layout for the header
+header_col1, header_col2 = st.columns([1, 8])  # Adjust the ratio as needed
 
 # Display the logo in the first column of the header
-with header:
+with header_col1:
     st.image(logo, width=100)  # Adjust the width to fit your logo size
+
+# Display the title or any other content in the second column
+with header_col2:
+    st.title("Chat Data Analysis")
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
