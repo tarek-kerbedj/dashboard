@@ -41,7 +41,7 @@ def create_heatmap(df, time_delta):
     plt.show()
 
 # Function to plot weekly sentiment analysis
-def plot_weekly_sentiment_analysis(df):
+def plot_weekly_sentiment_analysis(df, time_delta):
     # Weekly Sentiment Analysis
     latest_date = df['timestamp'].max()
     start_date = latest_date - timedelta(days=time_delta)
@@ -139,7 +139,7 @@ def plot_bar_chart(data, xlabel):
 
 # UI Layout
 def main_layout():
-    st.sidebar.image(logo, width=150)
+    st.sidebar.image(logo, width=300)
     st.sidebar.title("Navigation")
     st.sidebar.markdown("---")
 
@@ -165,14 +165,17 @@ def dashboard_tab():
     st.subheader("Dashboard")
     time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
     time_delta = {"1 week": 7, "1 month": 30, "3 months": 90}[time_delta_option]
+
     col1, col2, col3 = st.columns(3)
     with col1:
         create_heatmap(df, time_delta)
         st.pyplot()
     with col2:
-        plot_weekly_sentiment_analysis(df) if time_delta_option == "1 week" else (plot_monthly_sentiment_analysis(df) if time_delta_option == "1 month" else plot_3_months_sentiment_analysis(df))
+        plot_weekly_sentiment_analysis(df, time_delta) if time_delta_option == "1 week" else (plot_monthly_sentiment_analysis(df) if time_delta_option == "1 month" else plot_3_months_sentiment_analysis(df))
     with col3:
         line_graph_latest_week(df) if time_delta_option == "1 week" else (line_graph_latest_month(df) if time_delta_option == "1 month" else line_graph_latest_3_months(df))
+
+
 
 # Initialize session state
 if 'current_tab' not in st.session_state:
