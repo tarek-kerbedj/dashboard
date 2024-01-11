@@ -10,7 +10,7 @@ df = pd.read_csv('chat_data.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
 # Create a Streamlit app
-st.title("Chat Data Analysis")
+# st.title("Chat Data Analysis")
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
@@ -81,7 +81,7 @@ elif tab == "Dashboard":
         sentiment_counts_week = last_week_data.groupby(['day_of_week', 'sentiment']).size().unstack(fill_value=0)
         ordered_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         sentiment_counts_week = sentiment_counts_week.reindex(ordered_days).fillna(0)
-        plot_bar_chart(sentiment_counts_week, f"Weekly Sentiment Analysis for Last {time_delta} Days", "Days of the Week")
+        # plot_bar_chart(sentiment_counts_week, f"Weekly Sentiment Analysis for Last {time_delta} Days", "Days of the Week")
 
     # Function to plot monthly sentiment analysis
     def plot_monthly_sentiment_analysis(df, time_delta):
