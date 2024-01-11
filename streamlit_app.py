@@ -124,23 +124,9 @@ def line_graph_latest_3_months(df):
     plt.grid(True)
     st.pyplot()
 
-# Define the layout of the header
-header_col1, header_col2, header_col3 = st.columns([1, 4, 1])
+# Start of Streamlit UI
+st.sidebar.image(logo, width=200)
 
-# Place the logo in the first column
-with header_col1:
-    st.image(logo, width=100)  # Adjust the width to fit your logo
-
-# Set the title and navigation dropdown in the second column
-with header_col2:
-    st.markdown("## Agency Analytics")
-    # You can use st.selectbox or st.button to create a navigation menu here
-    # Example: st.selectbox('Choose Dashboard', ['Overview', 'Detailed View', ...])
-
-# Placeholder for user profile or settings in the third column
-with header_col3:
-    # You can use st.image to place a user profile icon or st.button for settings
-    st.write("User Profile Area") 
 # Custom CSS
 st.markdown(
     '<style>' + open('./styles.css').read() + '</style>',
