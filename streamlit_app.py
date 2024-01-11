@@ -9,6 +9,9 @@ from PIL import Image
 from pandas.tseries.offsets import DateOffset
 from datetime import timedelta
 
+# Enable wide mode
+st.set_page_config(layout="wide")
+
 # Load data from CSV
 df = pd.read_csv('./data/chat_data.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
