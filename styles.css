@@ -1,0 +1,65 @@
+/* style.css */
+
+/* Sidebar Styling */
+.sidebar .sidebar-content {
+    background-color: #333; /* Sidebar background color */
+    padding: 20px;
+    color: white; /* Text color in the sidebar */
+}
+
+.sidebar .css-1l02zno {
+    color: white; /* Sidebar button text color */
+}
+
+/* Main Content Styling */
+.css-14ha7ug {
+    background-color: #f7f7f7; /* Main content background color */
+}
+
+/* Navigation Buttons */
+.css-1azbupl {
+    background-color: #0078D4; /* Button background color */
+    color: white; /* Button text color */
+    border: none;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.css-1azbupl:hover {
+    background-color: #005a9e; /* Button background color on hover */
+}
+
+/* Header Styling */
+.header {
+    background-color: #333; /* Header background color */
+    padding: 20px;
+    color: white; /* Header text color */
+}
+
+/* Title Styling */
+.title {
+    font-size: 36px; /* Title font size */
+}
+
+/* About Section Styling */
+.about-section {
+    background-color: #fff; /* About section background color */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Dashboard Section Styling */
+.dashboard-section {
+    background-color: #fff; /* Dashboard section background color */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom Styling for Specific Elements */
+/* Add your custom CSS rules here for specific elements */
+

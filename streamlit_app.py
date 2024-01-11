@@ -138,8 +138,14 @@ def plot_bar_chart(data, xlabel):
     plt.tight_layout()
     st.pyplot()
 
+# Custom CSS to inject
+def load_css():
+    with open("styles.css") as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
 # UI Layout
 def main_layout():
+    load_css()
     with st.sidebar:
         st.image(logo, width=300)
         st.title("Navigation")
