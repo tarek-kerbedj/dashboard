@@ -63,9 +63,13 @@ elif tab == "Graphs":
     # Display heatmaps for 1 week, 1 month, and 3 months
     time_deltas = [7, 30, 90]  # 1 week, 1 month, 3 months in days
 
-    st.subheader(f"Weekly Activity Heatmap for Last {time_delta} Days")
-    create_heatmap(df, time_delta)
-    st.pyplot()
+    # Display heatmaps and sentiment analysis in columns
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader(f"Weekly Activity Heatmap for Last {time_delta} Days")
+        create_heatmap(df, time_delta)  # You should define this function before using it
+        st.pyplot()
 
     # Function to plot weekly sentiment analysis
     def plot_weekly_sentiment_analysis(df, time_delta):
@@ -115,16 +119,15 @@ elif tab == "Graphs":
         plt.tight_layout()
         st.pyplot()
 
-    # Streamlit app
-    # st.title("Sentiment Analysis Visualization")
+    st.subheader(f"Sentiment Analysis")
 
-    # Display the selected sentiment analysis plot using the same time_delta_option
-    if time_delta_option == "1 week":
-        plot_weekly_sentiment_analysis(df, time_delta)
-    elif time_delta_option == "1 month":
-        plot_monthly_sentiment_analysis(df, time_delta)
-    else:
-        plot_3_months_sentiment_analysis(df, time_delta)
+    with col2:
+        if time_delta_option == "1 week":
+            plot_weekly_sentiment_analysis(df, time_delta)  # Define this function
+        elif time_delta_option == "1 month":
+            plot_monthly_sentiment_analysis(df, time_delta)  # Define this function
+        else:
+            plot_3_months_sentiment_analysis(df, time_delta)  # Define this function
 
     from pandas.tseries.offsets import DateOffset
     import matplotlib.dates as mdates
@@ -179,10 +182,11 @@ elif tab == "Graphs":
         plt.grid(True)
         st.pyplot()
 
-    # Display the selected line graph using the same time_delta_option
+    # Display the line graph
+    st.subheader("Line Graph Analysis")
     if time_delta_option == "1 week":
-        line_graph_latest_week(df)
+        line_graph_latest_week(df)  # Define this function
     elif time_delta_option == "1 month":
-        line_graph_latest_month(df)
+        line_graph_latest_month(df)  # Define this function
     else:
-        line_graph_latest_3_months(df)
+        line_graph_latest_3_months(df)  # Define this function
