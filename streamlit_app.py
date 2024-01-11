@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from PIL import Image
 import numpy as np
 from datetime import timedelta
 
@@ -9,13 +10,14 @@ from datetime import timedelta
 df = pd.read_csv('chat_data.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
-from PIL import Image
-
 # Load your company logo
 logo = Image.open('./devan&company.png')
 
-# Display the logo in the sidebar
-st.sidebar.image(logo, use_column_width=True)
+header = st.columns([1,8])
+
+# Display the logo in the first column of the header
+with header:
+    st.image(logo, width=100)  # Adjust the width to fit your logo size
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
