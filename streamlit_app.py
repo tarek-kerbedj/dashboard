@@ -10,7 +10,14 @@ df = pd.read_csv('chat_data.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
 # Create a Streamlit app
-# st.title("Chat Data Analysis")
+st.set_page_config(
+    page_title="Chat Data Analysis",
+    page_icon=":chart_with_upwards_trend:",
+    layout="wide"  # Ensures a wider layout for sidebar and content
+)
+
+# Company Logo
+st.sidebar.image("redrusa_logo.png", use_container_width=True)
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
