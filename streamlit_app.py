@@ -12,7 +12,7 @@ df['timestamp'] = pd.to_datetime(df['timestamp'])
 from PIL import Image
 
 # Load your company logo
-logo = Image.open('./devan&company.jpg')
+logo = Image.open('./devan&company.png')
 
 # Display the logo in the sidebar
 st.sidebar.image(logo, use_column_width=True)
