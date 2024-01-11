@@ -19,15 +19,12 @@ st.sidebar.image(logo, use_column_width=True)
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
-# Create a sidebar with radio buttons for navigation
-tab = st.sidebar.radio("Navigation", ["Conversation", "Dashboard"])
-
 # Depending on the selected tab, display content
-if tab == "Conversation":
+if st.sidebar.button("Conversation"):
     st.subheader("Chat")
     st.write(df.sort_values(by='timestamp', ascending=False))
 
-elif tab == "Dashboard":
+elif st.sidebar.button("Dashboard"):
     # Define function to create heatmap for given time delta
     def create_heatmap(df, time_delta):
         # Filter data for the specified time period
