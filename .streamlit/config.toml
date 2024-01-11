@@ -19,11 +19,14 @@ font = "serif"
 # Set a custom page icon (favicon)
 [server]
 favicon = "path/to/favicon.ico"
-maxWidth = 1200
+maxWidth = 1500
 
 # Configure Streamlit caching options
 [global]
 caching = true
+
+[deprecation]
+showPyplotGlobalUse = false
 
 # Set the Streamlit port (default is 8501)
 # port = 8501
