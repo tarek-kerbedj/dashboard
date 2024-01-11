@@ -10,7 +10,7 @@ from pandas.tseries.offsets import DateOffset
 from datetime import timedelta
 
 # Load data from CSV
-df = pd.read_csv('chat_data.csv')
+df = pd.read_csv('./data/chat_data.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
 # Define function to create heatmap for given time delta
