@@ -9,15 +9,13 @@ from datetime import timedelta
 df = pd.read_csv('chat_data.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
-# Create a Streamlit app
-st.set_page_config(
-    page_title="Chat Data Analysis",
-    page_icon=":chart_with_upwards_trend:",
-    layout="wide"  # Ensures a wider layout for sidebar and content
-)
+from PIL import Image
 
-# Company Logo
-st.sidebar.image("redrusa_logo.png", use_container_width=True)
+# Load your company logo
+logo = Image.open('./redrusa_logo.png')
+
+# Display the logo in the sidebar
+st.sidebar.image(logo, use_column_width=True)
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
