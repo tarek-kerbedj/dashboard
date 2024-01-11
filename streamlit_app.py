@@ -2,18 +2,15 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from PIL import Image
 import numpy as np
-from pandas.tseries.offsets import DateOffset
 import matplotlib.dates as mdates
+from PIL import Image
+from pandas.tseries.offsets import DateOffset
 from datetime import timedelta
 
 # Load data from CSV
 df = pd.read_csv('chat_data.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
-
-# Load your company logo
-logo = Image.open('./devan&company.png')
 
 # Define function to create heatmap for given time delta
 def create_heatmap(df, time_delta):
@@ -140,65 +137,49 @@ def plot_bar_chart(data, xlabel):
     plt.tight_layout()
     st.pyplot()
 
-# Start of Streamlit UI
-st.sidebar.image(logo, width=300)
+# UI Layout
+def main_layout():
+    st.sidebar.image(logo, width=150)
+    st.sidebar.title("Navigation")
+    st.sidebar.markdown("---")
 
-# Adding a title or some text to the sidebar
-st.sidebar.title("Navigation")
-st.sidebar.markdown("---")
+    if st.sidebar.button("🏠 Dashboard"):
+        st.session_state['current_tab'] = 'Dashboard'
+    if st.sidebar.button("💬 Conversation"):
+        st.session_state['current_tab'] = 'Conversation'
 
-# Sidebar navigation with buttons styled as a menu
-if st.sidebar.button("🏠 Dashboard"):
-    st.session_state['current_tab'] = 'Dashboard'
-if st.sidebar.button("💬 Conversation"):
-    st.session_state['current_tab'] = 'Conversation'
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("## About")
+    st.sidebar.info("This app provides an interactive analysis of chat data.")
 
-st.sidebar.markdown("---")
-# Additional sidebar content
-st.sidebar.markdown("## About")
-st.sidebar.info("This app provides an interactive analysis of chat data. You can navigate between different views using the buttons above.")
+    if st.session_state['current_tab'] == 'Conversation':
+        conversation_tab()
+    elif st.session_state['current_tab'] == 'Dashboard':
+        dashboard_tab()
 
-# Main page layout
-if st.session_state['current_tab'] == 'Conversation':
+def conversation_tab():
     st.subheader("Chat")
     st.write(df.sort_values(by='timestamp', ascending=False))
 
-elif st.session_state['current_tab'] == 'Dashboard':
+def dashboard_tab():
     st.subheader("Dashboard")
-
-    # Sidebar for user input
     time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
-    if time_delta_option == "1 week":
-        time_delta = 7
-    elif time_delta_option == "1 month":
-        time_delta = 30
-    else:
-        time_delta = 90
-
-    # Display heatmaps for 1 week, 1 month, and 3 months
-    time_deltas = [7, 30, 90]  # 1 week, 1 month, 3 months in days
-
-    # Example of using columns to layout dashboard components
+    time_delta = {"1 week": 7, "1 month": 30, "3 months": 90}[time_delta_option]
     col1, col2, col3 = st.columns(3)
-
     with col1:
-        # st.subheader(f"Weekly Activity Heatmap for Last {time_delta} Days")
-        create_heatmap(df, time_delta)  # You should define this function before using it
+        create_heatmap(df, time_delta)
         st.pyplot()
-
     with col2:
-        if time_delta_option == "1 week":
-            plot_weekly_sentiment_analysis(df)  # Define this function
-        elif time_delta_option == "1 month":
-            plot_monthly_sentiment_analysis(df)  # Define this function
-        else:
-            plot_3_months_sentiment_analysis(df)  # Define this function
-
+        plot_weekly_sentiment_analysis(df) if time_delta_option == "1 week" else (plot_monthly_sentiment_analysis(df) if time_delta_option == "1 month" else plot_3_months_sentiment_analysis(df))
     with col3:
-        # Display the line graph
-        if time_delta_option == "1 week":
-            line_graph_latest_week(df)  # Define this function
-        elif time_delta_option == "1 month":
-            line_graph_latest_month(df)  # Define this function
-        else:
-            line_graph_latest_3_months(df)  # Define this function
+        line_graph_latest_week(df) if time_delta_option == "1 week" else (line_graph_latest_month(df) if time_delta_option == "1 month" else line_graph_latest_3_months(df))
+
+# Initialize session state
+if 'current_tab' not in st.session_state:
+    st.session_state['current_tab'] = 'Dashboard'
+
+# Load your company logo
+logo = Image.open('./devan&company.png')
+
+# Main
+main_layout()
