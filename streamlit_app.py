@@ -7,7 +7,6 @@ import matplotlib.dates as mdates
 from PIL import Image
 from pandas.tseries.offsets import DateOffset
 from datetime import timedelta
-from google.cloud import storage
 
 # Load data from CSV
 df = pd.read_csv('chat_data.csv')
