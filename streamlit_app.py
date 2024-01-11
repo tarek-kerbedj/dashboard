@@ -82,9 +82,9 @@ def line_graph_latest_week(df):
     plt.figure(figsize=(10, 6))
     sns.lineplot(x=daily_counts.index, y=daily_counts.values, marker='o')
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%A'))
-    plt.title('Messages in the Latest Week')
+    plt.title('Queries in the Latest Week')
     plt.xlabel('Day of the Week')
-    plt.ylabel('Number of Messages')
+    plt.ylabel('Number of Queries')
     plt.xticks(rotation=45)
     plt.grid(True)
     st.pyplot()
@@ -99,9 +99,9 @@ def line_graph_latest_month(df):
 
     plt.figure(figsize=(10, 6))
     sns.lineplot(x=weekly_counts.index, y=weekly_counts.values, marker='o')
-    plt.title('Messages in the Latest Month by Week')
+    plt.title('Queries in the Latest Month by Week')
     plt.xlabel('Week of Month')
-    plt.ylabel('Number of Messages')
+    plt.ylabel('Number of Queries')
     plt.xticks(range(1, 6))
     plt.grid(True)
     st.pyplot()
@@ -115,9 +115,9 @@ def line_graph_latest_3_months(df):
 
     plt.figure(figsize=(10, 6))
     sns.lineplot(x=monthly_counts.index.astype(str), y=monthly_counts.values, marker='o')
-    plt.title('Messages in the Latest 3 Months')
+    plt.title('Queries in the Latest 3 Months')
     plt.xlabel('Month')
-    plt.ylabel('Number of Messages')
+    plt.ylabel('Number of Queries')
     plt.xticks(rotation=45)
     plt.grid(True)
     st.pyplot()
@@ -138,14 +138,8 @@ def plot_bar_chart(data, xlabel):
     plt.tight_layout()
     st.pyplot()
 
-# Custom CSS to inject
-def load_css():
-    with open("styles.css") as f:
-        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-
 # UI Layout
 def main_layout():
-    load_css()
     with st.sidebar:
         st.image(logo, width=300)
         st.title("Navigation")
