@@ -164,24 +164,18 @@ def conversation_tab():
 
 def dashboard_tab():
     st.subheader("Dashboard")
-    st.markdown("Explore chat data through various visualizations.")
-
     time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
     time_delta = {"1 week": 7, "1 month": 30, "3 months": 90}[time_delta_option]
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.markdown("### Weekly Activity Heatmap")
         create_heatmap(df, time_delta)
         st.pyplot()
     with col2:
-        st.markdown("### Sentiment Analysis")
-        if time_delta_option == "1 week":
-            plot_weekly_sentiment_analysis(df, time_delta)
-        # ... [Other conditions]
+        plot_weekly_sentiment_analysis(df, time_delta) if time_delta_option == "1 week" else (plot_monthly_sentiment_analysis(df) if time_delta_option == "1 month" else plot_3_months_sentiment_analysis(df))
     with col3:
-        st.markdown("### Message Trends")
-        line_graph_latest_week(df) if time_delta_option == "1 week" else line_graph_latest_month(df)
+        line_graph_latest_week(df) if time_delta_option == "1 week" else (line_graph_latest_month(df) if time_delta_option == "1 month" else line_graph_latest_3_months(df))
+
 
 
 # Initialize session state
