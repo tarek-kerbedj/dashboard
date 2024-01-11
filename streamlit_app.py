@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -7,9 +8,20 @@ import matplotlib.dates as mdates
 from PIL import Image
 from pandas.tseries.offsets import DateOffset
 from datetime import timedelta
+from google.cloud import storage
+
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials/petair-408107-be3d24f00988.json"
+
+def load_data_from_gcs(bucket_name, source_blob_name):
+    """Loads data from a GCS bucket"""
+    client = storage.Client()
+    bucket = client.get_bucket(bucket_name)
+    blob = bucket.blob(source_blob_name)
+    data = blob.download_as_string()
+    return pd.read_csv(pd.compat.StringIO(data.decode('utf-8')))
 
 # Load data from CSV
-df = pd.read_csv('chat_data.csv')
+df = load_data_from_gcs('chat_message_log', 'chat_data.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
 # Define function to create heatmap for given time delta

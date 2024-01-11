@@ -322,3 +322,6 @@ tvm_home
 node_modules
 lib
 .parcel-cache
+
+# Credentials
+credentials/
