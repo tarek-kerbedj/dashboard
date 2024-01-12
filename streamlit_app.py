@@ -43,7 +43,6 @@ def create_heatmap(df, time_delta):
     plt.xlabel("2-Hour Interval")
     plt.ylabel("Day of the Week")
     plt.xticks(rotation=45)
-    plt.show()
 
 # Function to plot weekly sentiment analysis
 def plot_weekly_sentiment_analysis(df, time_delta):
