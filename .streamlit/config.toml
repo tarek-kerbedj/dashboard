@@ -2,10 +2,10 @@
 
 [general]
 # Set the title of your Streamlit app
-app_title = "My Chat Data Analysis App"
+app_title = "Devan & Company"
 
 # Set the base URL of your Streamlit app (if deploying on a server)
-# base_url = "http://your-server-url.com/myapp"
+# base_url = "http://dashboard_devco.com/myapp"
 
 # Customize the Streamlit theme
 [theme]
