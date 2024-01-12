@@ -43,27 +43,9 @@ def create_heatmap(df, time_delta):
     plt.xticks(rotation=45)
     st.pyplot()
 
-def plot_bar_chart(data, title, xlabel, ylabel='Count'):
-    """
-    Plots a bar chart using the data provided.
-    :param data: DataFrame with the data to plot
-    :param title: Title of the plot
-    :param xlabel: X-axis label
-    :param ylabel: Y-axis label
-    """
-    # Create a new figure and axis for the plot
-    fig, ax = plt.subplots(figsize=(10, 6))
-    data.plot(kind='bar', stacked=False, ax=ax)
-    ax.set_title(title)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    ax.set_xticklabels(data.index, rotation=45)
-    ax.legend()
-    st.pyplot(fig)  # Pass the figure to st.pyplot() instead of relying on the current figure
-
 def sentiment_analysis(df, period, period_title):
     """
-    Performs sentiment analysis based on the period provided and plots a bar chart.
+    Performs sentiment analysis based on the period provided and plots a radar chart.
     :param df: DataFrame with the data
     :param period: A string specifying the period ('week', 'month', or '3month')
     :param period_title: A descriptive title for the period
@@ -80,8 +62,27 @@ def sentiment_analysis(df, period, period_title):
         df['month_year'] = df['timestamp'].dt.to_period('M')
         pivot_data = df.pivot_table(index='month_year', columns='sentiment', values='timestamp', aggfunc='count').iloc[-3:]
 
-    # Plot the bar chart
-    plot_bar_chart(pivot_data, f'Sentiment Analysis by {period_title}', period_title)
+    # Create a list of sentiment categories and corresponding colors
+    sentiments = pivot_data.columns
+    colors = plt.cm.viridis(np.linspace(0, 1, len(sentiments)))
+
+    # Calculate the values for each sentiment category
+    values = pivot_data.values.T
+
+    # Create a radar chart
+    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw={'projection': 'polar'})
+    angles = np.linspace(0, 2 * np.pi, len(sentiments), endpoint=False).tolist()
+    angles += angles[:1]  # Close the plot
+
+    for i, (category, color) in enumerate(zip(sentiments, colors)):
+        ax.fill(angles, values[i], color=color, alpha=0.25, label=category)
+        ax.plot(angles, values[i], color=color, linewidth=2)
+
+    ax.set_thetagrids(np.degrees(angles), sentiments)
+    ax.set_title(f'Sentiment Analysis by {period_title}')
+    ax.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
+
+    st.pyplot(fig)
 
 # Function for line graph of the latest week with days of the week
 def line_graph_latest_week(df):
