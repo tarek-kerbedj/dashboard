@@ -3,10 +3,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-import matplotlib.dates as mdates
 import base64
 from PIL import Image
 from pandas.tseries.offsets import DateOffset
+from matplotlib.dates import DateFormatter
 
 # Enable wide mode
 st.set_page_config(layout="wide")
@@ -84,35 +84,51 @@ def sentiment_analysis(df, period, period_title):
     plot_bar_chart(pivot_data, f'Sentiment Analysis by {period_title}', period_title)
 
 # Function for line graph of the latest week with days of the week
-def plot_line_graph(df, date_col, groupby_col, agg_freq, title, xlabel, ylabel='Number of Queries'):
+def plot_line_graph(data, date_field, value_field, title, xlabel, ylabel, date_format='%A'):
     """
     Plots a line graph using the data provided.
-    :param df: DataFrame with the data to plot
-    :param date_col: The column name with date information
-    :param groupby_col: The column or transformation to group by (e.g., week_of_month)
-    :param agg_freq: Frequency for resampling ('D' for day, 'W' for week, 'M' for month)
+    :param data: DataFrame with the data to plot
+    :param date_field: The field name for dates in the DataFrame
+    :param value_field: The field name for values in the DataFrame
     :param title: Title of the plot
     :param xlabel: X-axis label
     :param ylabel: Y-axis label
+    :param date_format: Format string for the date labels
     """
-    # Resample or group the data as required
-    if agg_freq == 'D':
-        # For daily frequency, no resampling is needed, we just group by date
-        data = df.groupby(df[date_col].dt.date).size()
-    else:
-        # For weekly or monthly, we resample the data
-        data = df.set_index(date_col).resample(agg_freq).size()
-    
-    # Plot the data
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax = sns.lineplot(x=data.index, y=data.values, marker='o')
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%A')) if agg_freq == 'D' else ax.xaxis.set_major_locator(mdates.WeekdayLocator())
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(data=data, x=date_field, y=value_field, marker='o')
+    plt.gca().xaxis.set_major_formatter(DateFormatter(date_format))
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.xticks(rotation=45)
     plt.grid(True)
-    st.pyplot(fig)
+    st.pyplot()
+
+def line_graph_time_period(df, time_delta, period, title):
+    """
+    Prepares data and calls the function to plot a line graph for the specified time period.
+    :param df: DataFrame with the data
+    :param time_delta: Time delta object to determine the time period
+    :param period: The granularity of the time period ('week', 'month', or '3month')
+    :param title: Title for the plot
+    """
+    end_date = df['timestamp'].max()
+    start_date = end_date - time_delta
+    filtered_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
+    
+    if period == 'week':
+        filtered_data['date'] = filtered_data['timestamp'].dt.date
+        date_format = '%A'  # Day of the week
+    elif period == 'month':
+        filtered_data['date'] = filtered_data['timestamp'].dt.to_period('W').apply(lambda r: r.start_time)
+        date_format = '%m/%d'  # Month/Day
+    elif period == '3month':
+        filtered_data['date'] = filtered_data['timestamp'].dt.to_period('M').apply(lambda r: r.start_time)
+        date_format = '%Y-%m'  # Year-Month
+
+    data_counts = filtered_data.groupby('date').size().reset_index(name='counts')
+    plot_line_graph(data=data_counts, date_field='date', value_field='counts', title=title, xlabel='Date', ylabel='Number of Queries', date_format=date_format)
 
 # UI Layout
 def main_layout():
@@ -142,11 +158,16 @@ def conversation_tab():
 def dashboard_tab():
     st.subheader("Dashboard")
     time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
-    time_delta = {"1 week": 7, "1 month": 30, "3 months": 90}[time_delta_option]
+    time_deltas = {
+        "1 week": DateOffset(weeks=1),
+        "1 month": DateOffset(months=1),
+        "3 months": DateOffset(months=3)
+    }
+    time_delta = time_deltas[time_delta_option]
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        create_heatmap(df, time_delta)
+        create_heatmap(df, time_delta.days)
     with col2:
         if time_delta_option == "1 week":
             sentiment_analysis(df, 'week', 'Day of the Week')
@@ -155,12 +176,7 @@ def dashboard_tab():
         elif time_delta_option == "3 months":
             sentiment_analysis(df, '3month', 'Month')
     with col3:
-        if time_delta_option == "1 week":
-            plot_line_graph(df, 'timestamp', None, 'D', 'Queries in the Latest Week', 'Day of the Week')
-        elif time_delta_option == "1 month":
-            plot_line_graph(df, 'timestamp', 'week_of_month', 'W', 'Queries in the Latest Month by Week', 'Week of Month')
-        elif time_delta_option == "3 months":
-            plot_line_graph(df, 'timestamp', 'month_year', 'M', 'Queries in the Latest 3 Months', 'Month')
+         line_graph_time_period(df, time_delta, time_delta_option.replace(" ", ""), 'Queries in the Latest ' + time_delta_option)
 
 def get_base64_encoded_image(image_path):
     with open(image_path, "rb") as img_file:
