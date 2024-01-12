@@ -43,7 +43,7 @@ def create_heatmap(df, time_delta):
     plt.xlabel("2-Hour Interval")
     plt.ylabel("Day of the Week")
     plt.xticks(rotation=45)
-    st.pyplot()
+    plt.show()
 
 # Function to plot weekly sentiment analysis
 def plot_weekly_sentiment_analysis(df, time_delta):
@@ -175,6 +175,7 @@ def dashboard_tab():
     col1, col2, col3 = st.columns(3)
     with col1:
         create_heatmap(df, time_delta)
+        st.pyplot()
     with col2:
         plot_weekly_sentiment_analysis(df, time_delta) if time_delta_option == "1 week" else (plot_monthly_sentiment_analysis(df) if time_delta_option == "1 month" else plot_3_months_sentiment_analysis(df))
     with col3:
