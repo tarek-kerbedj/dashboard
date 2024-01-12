@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-import matplotlib.dates as mdates
+from math import pi
 import base64
 from PIL import Image
 from pandas.tseries.offsets import DateOffset
@@ -43,27 +43,9 @@ def create_heatmap(df, time_delta):
     plt.xticks(rotation=45)
     st.pyplot()
 
-def plot_bar_chart(data, title, xlabel, ylabel='Count'):
-    """
-    Plots a bar chart using the data provided.
-    :param data: DataFrame with the data to plot
-    :param title: Title of the plot
-    :param xlabel: X-axis label
-    :param ylabel: Y-axis label
-    """
-    # Create a new figure and axis for the plot
-    fig, ax = plt.subplots(figsize=(10, 6))
-    data.plot(kind='bar', stacked=False, ax=ax)
-    ax.set_title(title)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    ax.set_xticklabels(data.index, rotation=45)
-    ax.legend()
-    st.pyplot(fig)  # Pass the figure to st.pyplot() instead of relying on the current figure
-
 def sentiment_analysis(df, period, period_title):
     """
-    Performs sentiment analysis based on the period provided and plots a bar chart.
+    Performs sentiment analysis based on the period provided and plots a radar chart.
     :param df: DataFrame with the data
     :param period: A string specifying the period ('week', 'month', or '3month')
     :param period_title: A descriptive title for the period
@@ -80,9 +62,43 @@ def sentiment_analysis(df, period, period_title):
         df['month_year'] = df['timestamp'].dt.to_period('M')
         pivot_data = df.pivot_table(index='month_year', columns='sentiment', values='timestamp', aggfunc='count').iloc[-3:]
 
-    # Plot the bar chart
-    plot_bar_chart(pivot_data, f'Sentiment Analysis by {period_title}', period_title)
+    # Convert pivot_data to a format suitable for radar chart
+    categories = list(pivot_data.columns)
+    N = len(categories)
 
+    # Calculate the angles for the radar chart
+    angles = [n / float(N) * 2 * np.pi for n in range(N)]
+    angles += angles[:1]
+
+    # Radar chart setup
+    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+
+    # Draw one axe per sentiment
+    for idx, row in pivot_data.iterrows():
+        values = row.tolist()
+        values += values[:1]  # Repeat the first value to close the circle
+        ax.plot(angles, values, linewidth=1, linestyle='solid', label=idx)
+        ax.fill(angles, values, alpha=0.2)
+
+    # Add labels with emojis for each sentiment
+    emoji_dict = {
+        "Positive": "😃",
+        "Neutral": "😐",
+        "Negative": "😢",
+    }
+
+    labels = [emoji_dict.get(cat, cat) for cat in categories]  # Replace category with emoji if available
+
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(labels)  # Use labels with emojis
+
+    # Add legend and title
+    plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
+    plt.title(f'Sentiment Analysis ({period_title})')
+
+    # Display the chart
+    st.pyplot(fig)
+    
 # Utility function to get start date based on time period
 def get_start_date(end_date, period):
     if period == 'week':
@@ -154,7 +170,7 @@ def dashboard_tab():
     time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
     time_delta = {"1 week": 7, "1 month": 30, "3 months": 90}[time_delta_option]
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         create_heatmap(df, time_delta)
     with col2:
@@ -171,6 +187,17 @@ def dashboard_tab():
             line_graph(df, 'month')
         elif time_delta_option == "3 months":
             line_graph(df, '3months')
+    with col4:
+        # Error type distribution
+        latest_day_data = df[df['timestamp'].dt.date == df['timestamp'].max().date()]
+        total_errors_latest_day = latest_day_data['error'].sum()
+        error_type_counts_latest_day = latest_day_data[latest_day_data['error'] == 1]['type_of_error'].value_counts()
+        
+        plt.figure(figsize=(8, 8))
+        error_type_counts_latest_day.plot(kind='pie', autopct='%1.1f%%')
+        plt.title(f'Distribution of Error Types (Total Errors for today: {total_errors_latest_day})')
+        plt.ylabel('')
+        st.pyplot()
 
 def get_base64_encoded_image(image_path):
     with open(image_path, "rb") as img_file:
