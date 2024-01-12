@@ -224,7 +224,7 @@ def plot_error_types_distribution(df, time_period):
 # UI Layout
 def main_layout():
     with st.sidebar:
-        st.image(logo, width=300, use_container_width=False)
+        st.image(logo, width=300)
         st.title("Navigation")
         st.markdown("---")
 
