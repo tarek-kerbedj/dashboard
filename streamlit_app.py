@@ -45,36 +45,45 @@ def create_heatmap(df, time_delta):
     plt.xticks(rotation=45)
     st.pyplot()
 
-# Function to plot weekly sentiment analysis
-def plot_weekly_sentiment_analysis(df, time_delta):
-    # Weekly Sentiment Analysis
-    latest_date = df['timestamp'].max()
-    start_date = latest_date - timedelta(days=time_delta)
-    last_week_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= latest_date)]
-    last_week_data['day_of_week'] = last_week_data['timestamp'].dt.day_name()
-    sentiment_counts_week = last_week_data.groupby(['day_of_week', 'sentiment']).size().unstack()
-    ordered_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    sentiment_counts_week = sentiment_counts_week.reindex(ordered_days).fillna(0)
-    plot_bar_chart(sentiment_counts_week, "Days of the Week")
 
-# Function to plot monthly sentiment analysis
-def plot_monthly_sentiment_analysis(df):
-    # Monthly Sentiment Analysis
-    latest_date = df['timestamp'].max()
-    start_month_date = latest_date - pd.DateOffset(months=1)
-    last_month_data = df[(df['timestamp'] >= start_month_date) & (df['timestamp'] <= latest_date)]
-    last_month_data['week_of_month'] = last_month_data['timestamp'].apply(lambda x: (x.day - 1) // 7 + 1)
-    sentiment_counts_month = last_month_data.groupby(['week_of_month', 'sentiment']).size().unstack()
-    all_weeks = range(1, 6)
-    sentiment_counts_month = sentiment_counts_month.reindex(all_weeks).fillna(0)
-    plot_bar_chart(sentiment_counts_month, "Weeks of the Month")
+def plot_bar_chart(data, title, xlabel, ylabel='Count'):
+    """
+    Plots a bar chart using the data provided.
+    :param data: DataFrame with the data to plot
+    :param title: Title of the plot
+    :param xlabel: X-axis label
+    :param ylabel: Y-axis label
+    """
+    plt.figure(figsize=(10, 6))
+    data.plot(kind='bar', stacked=False)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    st.pyplot()
 
-# Function to plot 3 months sentiment analysis
-def plot_3_months_sentiment_analysis(df):
-    # 3 Months Sentiment Analysis
-    df['month_year'] = df['timestamp'].dt.to_period('M')
-    sentiment_counts_3months = df.groupby(['month_year', 'sentiment']).size().unstack().iloc[-3:]
-    plot_bar_chart(sentiment_counts_3months, "Month")
+def sentiment_analysis(df, period, period_title):
+    """
+    Performs sentiment analysis based on the period provided and plots a bar chart.
+    :param df: DataFrame with the data
+    :param period: A string specifying the period ('week', 'month', or '3month')
+    :param period_title: A descriptive title for the period
+    """
+    # Generate a pivot table based on the period
+    if period == 'week':
+        df['day_of_week'] = df['timestamp'].dt.day_name()
+        pivot_data = df.pivot_table(index='day_of_week', columns='sentiment', values='timestamp', aggfunc='count').reindex([
+            "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
+    elif period == 'month':
+        df['week_of_month'] = df['timestamp'].apply(lambda x: (x.day - 1) // 7 + 1)
+        pivot_data = df.pivot_table(index='week_of_month', columns='sentiment', values='timestamp', aggfunc='count')
+    elif period == '3month':
+        df['month_year'] = df['timestamp'].dt.to_period('M')
+        pivot_data = df.pivot_table(index='month_year', columns='sentiment', values='timestamp', aggfunc='count').iloc[-3:]
+
+    # Plot the bar chart
+    plot_bar_chart(pivot_data, f'Sentiment Analysis by {period_title}', period_title)
 
 # Function for line graph of the latest week with days of the week
 def line_graph_latest_week(df):
@@ -126,22 +135,6 @@ def line_graph_latest_3_months(df):
     plt.grid(True)
     st.pyplot()
 
-# Function to plot bar chart
-def plot_bar_chart(data, xlabel):
-    plt.figure(figsize=(10, 6))
-    bar_width = 0.2
-    index = np.arange(len(data))
-
-    for i, sentiment in enumerate(data.columns):
-        plt.bar(index + i * bar_width, data[sentiment], bar_width, label=f'{sentiment.capitalize()}')
-
-    plt.xlabel(xlabel)
-    plt.ylabel('Percentage')
-    plt.xticks(index + bar_width, data.index)
-    plt.legend()
-    plt.tight_layout()
-    st.pyplot()
-
 # UI Layout
 def main_layout():
     with st.sidebar:
@@ -176,7 +169,12 @@ def dashboard_tab():
     with col1:
         create_heatmap(df, time_delta)
     with col2:
-        plot_weekly_sentiment_analysis(df, time_delta) if time_delta_option == "1 week" else (plot_monthly_sentiment_analysis(df) if time_delta_option == "1 month" else plot_3_months_sentiment_analysis(df))
+        if time_delta_option == "1 week":
+            sentiment_analysis(df, 'week', 'Day of the Week')
+        elif time_delta_option == "1 month":
+            sentiment_analysis(df, 'month', 'Week of the Month')
+        elif time_delta_option == "3 months":
+            sentiment_analysis(df, '3month', 'Month')
     with col3:
         line_graph_latest_week(df) if time_delta_option == "1 week" else (line_graph_latest_month(df) if time_delta_option == "1 month" else line_graph_latest_3_months(df))
 
