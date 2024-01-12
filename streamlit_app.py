@@ -3,10 +3,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import matplotlib.dates as mdates
 import base64
 from PIL import Image
 from pandas.tseries.offsets import DateOffset
-from matplotlib.dates import DateFormatter
 
 # Enable wide mode
 st.set_page_config(layout="wide")
@@ -84,51 +84,54 @@ def sentiment_analysis(df, period, period_title):
     plot_bar_chart(pivot_data, f'Sentiment Analysis by {period_title}', period_title)
 
 # Function for line graph of the latest week with days of the week
-def plot_line_graph(data, date_field, value_field, title, xlabel, ylabel, date_format='%A'):
-    """
-    Plots a line graph using the data provided.
-    :param data: DataFrame with the data to plot
-    :param date_field: The field name for dates in the DataFrame
-    :param value_field: The field name for values in the DataFrame
-    :param title: Title of the plot
-    :param xlabel: X-axis label
-    :param ylabel: Y-axis label
-    :param date_format: Format string for the date labels
-    """
+def line_graph_latest_week(df):
+    end_date = df['timestamp'].max()
+    start_date = end_date - DateOffset(days=7)
+    week_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
+    daily_counts = week_data.groupby(week_data['timestamp'].dt.date).size()
+
     plt.figure(figsize=(10, 6))
-    sns.lineplot(data=data, x=date_field, y=value_field, marker='o')
-    plt.gca().xaxis.set_major_formatter(DateFormatter(date_format))
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
+    sns.lineplot(x=daily_counts.index, y=daily_counts.values, marker='o')
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%A'))
+    plt.title('Queries in the Latest Week')
+    plt.xlabel('Day of the Week')
+    plt.ylabel('Number of Queries')
     plt.xticks(rotation=45)
     plt.grid(True)
     st.pyplot()
 
-def line_graph_time_period(df, time_delta, period, title):
-    """
-    Prepares data and calls the function to plot a line graph for the specified time period.
-    :param df: DataFrame with the data
-    :param time_delta: Time delta object to determine the time period
-    :param period: The granularity of the time period ('week', 'month', or '3month')
-    :param title: Title for the plot
-    """
+# Function for line graph of the latest month (weeks)
+def line_graph_latest_month(df):
     end_date = df['timestamp'].max()
-    start_date = end_date - time_delta
-    filtered_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
-    
-    if period == 'week':
-        filtered_data['date'] = filtered_data['timestamp'].dt.date
-        date_format = '%A'  # Day of the week
-    elif period == 'month':
-        filtered_data['date'] = filtered_data['timestamp'].dt.to_period('W').apply(lambda r: r.start_time)
-        date_format = '%m/%d'  # Month/Day
-    elif period == '3month':
-        filtered_data['date'] = filtered_data['timestamp'].dt.to_period('M').apply(lambda r: r.start_time)
-        date_format = '%Y-%m'  # Year-Month
+    start_date = end_date - DateOffset(months=1)
+    month_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
+    month_data['week_of_month'] = month_data['timestamp'].apply(lambda x: (x.day - 1) // 7 + 1)
+    weekly_counts = month_data.groupby('week_of_month').size().reindex(range(1, 6))
 
-    data_counts = filtered_data.groupby('date').size().reset_index(name='counts')
-    plot_line_graph(data=data_counts, date_field='date', value_field='counts', title=title, xlabel='Date', ylabel='Number of Queries', date_format=date_format)
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(x=weekly_counts.index, y=weekly_counts.values, marker='o')
+    plt.title('Queries in the Latest Month by Week')
+    plt.xlabel('Week of Month')
+    plt.ylabel('Number of Queries')
+    plt.xticks(range(1, 6))
+    plt.grid(True)
+    st.pyplot()
+
+# Function for line graph of the latest 3 months (months)
+def line_graph_latest_3_months(df):
+    end_date = df['timestamp'].max()
+    start_date = end_date - DateOffset(months=3)
+    months_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
+    monthly_counts = months_data.groupby(months_data['timestamp'].dt.to_period('M')).size()
+
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(x=monthly_counts.index.astype(str), y=monthly_counts.values, marker='o')
+    plt.title('Queries in the Latest 3 Months')
+    plt.xlabel('Month')
+    plt.ylabel('Number of Queries')
+    plt.xticks(rotation=45)
+    plt.grid(True)
+    st.pyplot()
 
 # UI Layout
 def main_layout():
@@ -171,7 +174,7 @@ def dashboard_tab():
         elif time_delta_option == "3 months":
             sentiment_analysis(df, '3month', 'Month')
     with col3:
-         line_graph_time_period(df, time_delta, time_delta_option.replace(" ", ""), 'Queries in the Latest ' + time_delta_option)
+        line_graph_latest_week(df) if time_delta_option == "1 week" else (line_graph_latest_month(df) if time_delta_option == "1 month" else line_graph_latest_3_months(df))
 
 def get_base64_encoded_image(image_path):
     with open(image_path, "rb") as img_file:
