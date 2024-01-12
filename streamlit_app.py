@@ -170,7 +170,7 @@ def dashboard_tab():
     time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
     time_delta = {"1 week": 7, "1 month": 30, "3 months": 90}[time_delta_option]
 
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2 = st.columns(2)
     with col1:
         create_heatmap(df, time_delta)
     with col2:
@@ -180,6 +180,7 @@ def dashboard_tab():
             sentiment_analysis(df, 'month', 'Week of the Month')
         elif time_delta_option == "3 months":
             sentiment_analysis(df, '3month', 'Month')
+    col3, col4 = st.columns(2)
     with col3:
         if time_delta_option == "1 week":
             line_graph(df, 'week')
