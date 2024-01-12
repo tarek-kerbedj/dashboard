@@ -102,6 +102,7 @@ def line_graph(df, period):
     if period == 'week':
         period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
         counts = period_data.groupby(period_data['timestamp'].dt.date).size()
+        counts.index = pd.to_datetime(counts.index)
         x_labels = counts.index.strftime('%A')
     elif period == 'month':
         period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
