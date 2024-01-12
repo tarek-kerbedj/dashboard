@@ -43,7 +43,9 @@ def create_heatmap(df, time_delta):
     plt.xlabel("2-Hour Interval")
     plt.ylabel("Day of the Week")
     plt.xticks(rotation=45)
-    plt.show()
+    # Remove plt.show() and use st.pyplot() to display the plot
+    st.pyplot(plt.gcf())  # plt.gcf() gets the current figure before it's cleared by st.pyplot()
+    plt.clf()  # Clear the figure to prevent reuse
 
 # Function to plot weekly sentiment analysis
 def plot_weekly_sentiment_analysis(df, time_delta):
@@ -196,7 +198,7 @@ def set_background(image_file):
     </style>
     '''
     st.markdown(page_bg_img, unsafe_allow_html=True)
-    
+
 # Call the function to add the background
 set_background('./source/background.jpg')
 
