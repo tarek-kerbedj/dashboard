@@ -43,6 +43,7 @@ def create_heatmap(df, time_delta):
     plt.xlabel("2-Hour Interval")
     plt.ylabel("Day of the Week")
     plt.xticks(rotation=45)
+    st.pyplot()
 
 # Function to plot weekly sentiment analysis
 def plot_weekly_sentiment_analysis(df, time_delta):
@@ -90,11 +91,7 @@ def line_graph_latest_week(df):
     plt.ylabel('Number of Queries')
     plt.xticks(rotation=45)
     plt.grid(True)
-    # Ensure st.pyplot() is the last line in the function
-    st.pyplot(plt.gcf())  # plt.gcf() gets the current figure before it's cleared by st.pyplot()
-    plt.clf()  # Clear the figure to prevent reuse
-    return st.empty()  # Return an empty placeholder to prevent 'None' from being rendered
-
+    st.pyplot()
 
 # Function for line graph of the latest month (weeks)
 def line_graph_latest_month(df):
@@ -111,11 +108,7 @@ def line_graph_latest_month(df):
     plt.ylabel('Number of Queries')
     plt.xticks(range(1, 6))
     plt.grid(True)
-    # Ensure st.pyplot() is the last line in the function
-    st.pyplot(plt.gcf())  # plt.gcf() gets the current figure before it's cleared by st.pyplot()
-    plt.clf()  # Clear the figure to prevent reuse
-    return st.empty()  # Return an empty placeholder to prevent 'None' from being rendered
-
+    st.pyplot()
 
 # Function for line graph of the latest 3 months (months)
 def line_graph_latest_3_months(df):
@@ -131,10 +124,7 @@ def line_graph_latest_3_months(df):
     plt.ylabel('Number of Queries')
     plt.xticks(rotation=45)
     plt.grid(True)
-    # Ensure st.pyplot() is the last line in the function
-    st.pyplot(plt.gcf())  # plt.gcf() gets the current figure before it's cleared by st.pyplot()
-    plt.clf()  # Clear the figure to prevent reuse
-    return st.empty()  # Return an empty placeholder to prevent 'None' from being rendered
+    st.pyplot()
 
 # Function to plot bar chart
 def plot_bar_chart(data, xlabel):
@@ -150,11 +140,7 @@ def plot_bar_chart(data, xlabel):
     plt.xticks(index + bar_width, data.index)
     plt.legend()
     plt.tight_layout()
-    # Ensure st.pyplot() is the last line in the function
-    st.pyplot(plt.gcf())  # plt.gcf() gets the current figure before it's cleared by st.pyplot()
-    plt.clf()  # Clear the figure to prevent reuse
-    return st.empty()  # Return an empty placeholder to prevent 'None' from being rendered
-
+    st.pyplot()
 
 # UI Layout
 def main_layout():
@@ -189,7 +175,6 @@ def dashboard_tab():
     col1, col2, col3 = st.columns(3)
     with col1:
         create_heatmap(df, time_delta)
-        st.pyplot()
     with col2:
         plot_weekly_sentiment_analysis(df, time_delta) if time_delta_option == "1 week" else (plot_monthly_sentiment_analysis(df) if time_delta_option == "1 month" else plot_3_months_sentiment_analysis(df))
     with col3:
