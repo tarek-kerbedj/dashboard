@@ -143,7 +143,7 @@ def plot_bar_chart(data, xlabel):
     plt.xticks(index + bar_width, data.index)
     plt.legend()
     plt.tight_layout()
-    st.pyplot(plt.gcf())  # plt.gcf() gets the current figure before it's cleared by st.pyplot()
+    st.pyplot()
     return st.empty()
 
 # UI Layout
