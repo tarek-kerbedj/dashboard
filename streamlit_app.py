@@ -154,12 +154,18 @@ def conversation_tab():
 def dashboard_tab():
     st.subheader("Dashboard")
     time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
+    time_delta = {"1 week": 7, "1 month": 30, "3 months": 90}[time_delta_option]
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        create_heatmap(df, {"1 week": 7, "1 month": 30, "3 months": 90}[time_delta_option])
+        create_heatmap(df, time_delta)
     with col2:
-        sentiment_analysis(df, time_delta_option.split()[1], time_delta_option)
+        if time_delta_option == "1 week":
+            sentiment_analysis(df, 'week', 'Day of the Week')
+        elif time_delta_option == "1 month":
+            sentiment_analysis(df, 'month', 'Week of the Month')
+        elif time_delta_option == "3 months":
+            sentiment_analysis(df, '3month', 'Month')
     with col3:
         plot_line_graph(df, time_delta_option.split()[1], f'Queries in the Latest {time_delta_option}', 'Day of the Week')
 
