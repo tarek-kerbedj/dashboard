@@ -160,21 +160,21 @@ def conversation_tab():
 
 def dashboard_tab():
     st.subheader("Dashboard")
-    time_delta_option = st.selectbox("Select Time Period", ["7 days", "30 days", "90 days"])
-    time_delta = {"7 days": 7, "30 days": 30, "90 days": 90}[time_delta_option]
+    time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
+    time_delta = {"1 week": 7, "1 month": 30, "3 months": 90}[time_delta_option]
 
     col1, col2, col3 = st.columns(3)
     with col1:
         create_heatmap(df, time_delta)
     with col2:
-        if time_delta_option == "7 days":
+        if time_delta_option == "1 week":
             sentiment_analysis(df, 'week', 'Day of the Week')
-        elif time_delta_option == "30 days":
+        elif time_delta_option == "1 month":
             sentiment_analysis(df, 'month', 'Week of the Month')
-        elif time_delta_option == "90 days":
+        elif time_delta_option == "3 months":
             sentiment_analysis(df, '3month', 'Month')
     with col3:
-        line_graph_latest_week(df) if time_delta_option == "7 days" else (line_graph_latest_month(df) if time_delta_option == "30 days" else line_graph_latest_3_months(df))
+        line_graph_latest_week(df) if time_delta_option == "1 week" else (line_graph_latest_month(df) if time_delta_option == "1 month" else line_graph_latest_3_months(df))
 
 def get_base64_encoded_image(image_path):
     with open(image_path, "rb") as img_file:
