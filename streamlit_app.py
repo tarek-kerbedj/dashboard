@@ -111,18 +111,16 @@ def line_graph(df, period):
         x_labels = range(1, 6)
     elif period == '3months':
         period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
-        monthly_counts = period_data.groupby(period_data['timestamp'].dt.to_period('M')).size()
-
-        # Convert PeriodIndex to DateTimeIndex (or string) for plotting
-        monthly_counts.index = monthly_counts.index.to_timestamp()
-        x_labels = monthly_counts.index.strftime('%Y-%m')
+        counts = period_data.groupby(period_data['timestamp'].dt.to_period('M')).size()
+        counts.index = counts.index.to_timestamp()
+        x_labels = counts.index.strftime('%Y-%m')
 
     plt.figure(figsize=(10, 6))
-    sns.lineplot(x=monthly_counts.index, y=monthly_counts.values, marker='o')
-    plt.title('Queries in the Latest 3 Months')
-    plt.xlabel('Month')
+    sns.lineplot(x=counts.index, y=counts.values, marker='o')
+    plt.title(f'Queries in the Latest {period.capitalize()}')
+    plt.xlabel('Time Period')
     plt.ylabel('Number of Queries')
-    plt.xticks(ticks=monthly_counts.index, labels=x_labels, rotation=45)
+    plt.xticks(ticks=counts.index, labels=x_labels, rotation=45)
     plt.grid(True)
     st.pyplot()
 
