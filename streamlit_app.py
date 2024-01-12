@@ -117,14 +117,14 @@ def line_graph(df, period):
         monthly_counts.index = monthly_counts.index.to_timestamp()
         x_labels = monthly_counts.index.strftime('%Y-%m')
 
-        plt.figure(figsize=(10, 6))
-        sns.lineplot(x=monthly_counts.index, y=monthly_counts.values, marker='o')
-        plt.title('Queries in the Latest 3 Months')
-        plt.xlabel('Month')
-        plt.ylabel('Number of Queries')
-        plt.xticks(ticks=monthly_counts.index, labels=x_labels, rotation=45)
-        plt.grid(True)
-        st.pyplot()
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(x=monthly_counts.index, y=monthly_counts.values, marker='o')
+    plt.title('Queries in the Latest 3 Months')
+    plt.xlabel('Month')
+    plt.ylabel('Number of Queries')
+    plt.xticks(ticks=monthly_counts.index, labels=x_labels, rotation=45)
+    plt.grid(True)
+    st.pyplot()
 
 # UI Layout
 def main_layout():
