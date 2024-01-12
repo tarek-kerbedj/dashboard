@@ -110,7 +110,7 @@ def get_start_date(end_date, period):
     else:
         return None
 
-# Refactored function for line graph
+# Updated line_graph function
 def line_graph(df, period):
     end_date = df['timestamp'].max()
     start_date = get_start_date(end_date, period)
@@ -120,24 +120,105 @@ def line_graph(df, period):
         counts = period_data.groupby(period_data['timestamp'].dt.date).size()
         counts.index = pd.to_datetime(counts.index)
         x_labels = counts.index.strftime('%A')
+        
+        # Calculate the number of users per day
+        users_per_day = period_data.groupby(period_data['timestamp'].dt.date)['user_id'].nunique()
+
     elif period == 'month':
         period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
         period_data['week_of_month'] = period_data['timestamp'].apply(lambda x: (x.day - 1) // 7 + 1)
         counts = period_data.groupby('week_of_month').size()
         x_labels = range(1, 6)
+        
+        # Calculate the number of users per week
+        users_per_week = period_data.groupby('week_of_month')['user_id'].nunique()
+
     elif period == '3months':
         period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
         counts = period_data.groupby(period_data['timestamp'].dt.to_period('M')).size()
         counts.index = counts.index.to_timestamp()
         x_labels = counts.index.strftime('%Y-%m')
+        
+        # Calculate the number of users per month
+        users_per_month = period_data.groupby(period_data['timestamp'].dt.to_period('M'))['user_id'].nunique()
 
     plt.figure(figsize=(10, 6))
-    sns.lineplot(x=counts.index, y=counts.values, marker='o')
-    plt.title(f'Queries in the Latest {period.capitalize()}')
+    plt.plot(counts.index, counts.values, marker='o', label='Number of Queries', linestyle='-', color='blue')
+    plt.title(f'Queries and Users in the Latest {period.capitalize()}')
     plt.xlabel('Time Period')
-    plt.ylabel('Number of Queries')
+    plt.ylabel('Count')
     plt.xticks(ticks=counts.index, labels=x_labels, rotation=45)
+    
+    # Plot the number of users on the same graph
+    if period == 'week':
+        plt.plot(users_per_day.index, users_per_day.values, marker='s', linestyle='--', color='red', label='Number of Users')
+    elif period == 'month':
+        plt.plot(users_per_week.index, users_per_week.values, marker='s', linestyle='--', color='red', label='Number of Users')
+    elif period == '3months':
+        plt.plot(users_per_month.index, users_per_month.values, marker='s', linestyle='--', color='red', label='Number of Users')
+    
+    plt.legend(loc='upper left', bbox_to_anchor=(0.7, 1.0))  # Adjust legend position
     plt.grid(True)
+    st.pyplot()
+
+def plot_error_types_distribution(df, time_period):
+    # Set time period start and end dates
+    end_date = df['timestamp'].max()
+    
+    if time_period == '1W':
+        start_date = end_date - pd.DateOffset(days=6)
+    elif time_period == '1M':
+        start_date = end_date - pd.DateOffset(days=30)
+    elif time_period == '3M':
+        start_date = end_date - pd.DateOffset(months=2)
+
+    # Convert start_date to Timestamp
+    start_date = pd.Timestamp(start_date)
+
+    # Filter data for the specified time period
+    time_period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
+
+    # Determine the appropriate grouping and title based on time period
+    if time_period == '1W':
+        days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        grouping_column = time_period_data['timestamp'].dt.strftime('%A')
+        title = 'Error Types Distribution Over the Last 7 Days'
+        xlabel = 'Count'
+        ylabel = 'Day of the Week'
+    elif time_period == '1M':
+        num_weeks = (time_period_data['timestamp'].dt.day - 1).max() // 7 + 1
+        grouping_column = (time_period_data['timestamp'].dt.day - 1) // 7 + 1
+        title = 'Error Types Distribution Over the Last 1 Month'
+        xlabel = 'Count'
+        ylabel = 'Weeks of the Month'
+    elif time_period == '3M':
+        grouping_column = time_period_data['timestamp'].dt.strftime('%B %Y')
+        title = 'Error Types Distribution Over the Last 3 Months'
+        xlabel = 'Count'
+        ylabel = 'Month'
+
+    # Group by 'type_of_error' and count each type for the specified time period
+    error_counts = time_period_data.pivot_table(index=grouping_column, columns='type_of_error', values='error', aggfunc='sum', fill_value=0)
+
+    # Create a horizontal stacked bar chart for the error types
+    plt.figure(figsize=(12, 6))
+    sns.set_palette("Set2")  # Use a color palette
+    ax = error_counts.plot(kind='barh', stacked=True)
+
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend(title='Error Type', bbox_to_anchor=(1.05, 1), loc='upper left')
+
+    if time_period == '1W':
+        ax.set_yticks(range(len(days_order)))  # Set ticks for all days
+        ax.set_yticklabels(days_order)  # Set correct order of days
+
+    # Remove top and right spines
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    plt.tight_layout()
     st.pyplot()
 
 # UI Layout
@@ -189,16 +270,14 @@ def dashboard_tab():
         elif time_delta_option == "3 months":
             line_graph(df, '3months')
     with col4:
-        # Error type distribution
-        latest_day_data = df[df['timestamp'].dt.date == df['timestamp'].max().date()]
-        total_errors_latest_day = latest_day_data['error'].sum()
-        error_type_counts_latest_day = latest_day_data[latest_day_data['error'] == 1]['type_of_error'].value_counts()
+        if time_delta_option == "1 week":
+            plot_error_types_distribution(df, time_period='1W')
+
+        elif time_delta_option == "1 month":
+            plot_error_types_distribution(df, time_period='1M')
         
-        plt.figure(figsize=(8, 8))
-        error_type_counts_latest_day.plot(kind='pie', autopct='%1.1f%%')
-        plt.title(f'Distribution of Error Types (Total Errors for today: {total_errors_latest_day})')
-        plt.ylabel('')
-        st.pyplot()
+        elif time_delta_option == "3 months":
+            plot_error_types_distribution(df, time_period='3M')
 
 def get_base64_encoded_image(image_path):
     with open(image_path, "rb") as img_file:
