@@ -150,7 +150,11 @@ def plot_bar_chart(data, xlabel):
     plt.xticks(index + bar_width, data.index)
     plt.legend()
     plt.tight_layout()
-    st.pyplot()
+    # Ensure st.pyplot() is the last line in the function
+    st.pyplot(plt.gcf())  # plt.gcf() gets the current figure before it's cleared by st.pyplot()
+    plt.clf()  # Clear the figure to prevent reuse
+    return st.empty()  # Return an empty placeholder to prevent 'None' from being rendered
+
 
 # UI Layout
 def main_layout():
