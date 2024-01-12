@@ -68,7 +68,8 @@ def sentiment_analysis(df, period, period_title):
     :param period: A string specifying the period ('week', 'month', or '3month')
     :param period_title: A descriptive title for the period
     """
-    # Generate a pivot table based on the period
+    pivot_data = None  # Initialize pivot_data to None
+
     if period == 'week':
         df['day_of_week'] = df['timestamp'].dt.day_name()
         pivot_data = df.pivot_table(index='day_of_week', columns='sentiment', values='timestamp', aggfunc='count').reindex([
@@ -79,9 +80,14 @@ def sentiment_analysis(df, period, period_title):
     elif period == '3month':
         df['month_year'] = df['timestamp'].dt.to_period('M')
         pivot_data = df.pivot_table(index='month_year', columns='sentiment', values='timestamp', aggfunc='count').iloc[-3:]
+    else:
+        st.error(f"Invalid period: {period}. Expected 'week', 'month', or '3month'.")
+        return
 
-    # Plot the bar chart
-    plot_bar_chart(pivot_data, f'Sentiment Analysis by {period_title}', period_title)
+    if pivot_data is not None:
+        plot_bar_chart(pivot_data, f'Sentiment Analysis by {period_title}', period_title)
+    else:
+        st.error("No data to plot.")
 
 def plot_line_graph(df, time_period, title, xlabel, ylabel='Number of Queries'):
     """
@@ -159,7 +165,11 @@ def dashboard_tab():
     with col1:
         create_heatmap(df, {"1 week": 7, "1 month": 30, "3 months": 90}[time_delta_option])
     with col2:
-        sentiment_analysis(df, time_delta_option.split()[1], time_delta_option)
+        time_period = time_delta_option.split()[1]
+        if time_period in ['week', 'month', '3month']:
+            sentiment_analysis(df, time_period, time_delta_option)
+        else:
+            st.error(f"Invalid time period selected: {time_period}")
     with col3:
         plot_line_graph(df, time_delta_option.split()[1], f'Queries in the Latest {time_delta_option}', 'Day of the Week')
 
