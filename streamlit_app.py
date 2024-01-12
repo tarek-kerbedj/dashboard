@@ -83,53 +83,42 @@ def sentiment_analysis(df, period, period_title):
     # Plot the bar chart
     plot_bar_chart(pivot_data, f'Sentiment Analysis by {period_title}', period_title)
 
-# Function for line graph of the latest week with days of the week
-def line_graph_latest_week(df):
+# Utility function to get start date based on time period
+def get_start_date(end_date, period):
+    if period == 'week':
+        return end_date - DateOffset(days=7)
+    elif period == 'month':
+        return end_date - DateOffset(months=1)
+    elif period == '3months':
+        return end_date - DateOffset(months=3)
+    else:
+        return None
+
+# Refactored function for line graph
+def line_graph(df, period):
     end_date = df['timestamp'].max()
-    start_date = end_date - DateOffset(days=7)
-    week_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
-    daily_counts = week_data.groupby(week_data['timestamp'].dt.date).size()
+    start_date = get_start_date(end_date, period)
+
+    if period == 'week':
+        period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
+        counts = period_data.groupby(period_data['timestamp'].dt.date).size()
+        x_labels = counts.index.strftime('%A')
+    elif period == 'month':
+        period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
+        period_data['week_of_month'] = period_data['timestamp'].apply(lambda x: (x.day - 1) // 7 + 1)
+        counts = period_data.groupby('week_of_month').size()
+        x_labels = range(1, 6)
+    elif period == '3months':
+        period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
+        counts = period_data.groupby(period_data['timestamp'].dt.to_period('M')).size()
+        x_labels = counts.index.astype(str)
 
     plt.figure(figsize=(10, 6))
-    sns.lineplot(x=daily_counts.index, y=daily_counts.values, marker='o')
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%A'))
-    plt.title('Queries in the Latest Week')
-    plt.xlabel('Day of the Week')
+    sns.lineplot(x=counts.index, y=counts.values, marker='o')
+    plt.title(f'Queries in the Latest {period.capitalize()}')
+    plt.xlabel('Time Period')
     plt.ylabel('Number of Queries')
-    plt.xticks(rotation=45)
-    plt.grid(True)
-    st.pyplot()
-
-# Function for line graph of the latest month (weeks)
-def line_graph_latest_month(df):
-    end_date = df['timestamp'].max()
-    start_date = end_date - DateOffset(months=1)
-    month_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
-    month_data['week_of_month'] = month_data['timestamp'].apply(lambda x: (x.day - 1) // 7 + 1)
-    weekly_counts = month_data.groupby('week_of_month').size().reindex(range(1, 6))
-
-    plt.figure(figsize=(10, 6))
-    sns.lineplot(x=weekly_counts.index, y=weekly_counts.values, marker='o')
-    plt.title('Queries in the Latest Month by Week')
-    plt.xlabel('Week of Month')
-    plt.ylabel('Number of Queries')
-    plt.xticks(range(1, 6))
-    plt.grid(True)
-    st.pyplot()
-
-# Function for line graph of the latest 3 months (months)
-def line_graph_latest_3_months(df):
-    end_date = df['timestamp'].max()
-    start_date = end_date - DateOffset(months=3)
-    months_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
-    monthly_counts = months_data.groupby(months_data['timestamp'].dt.to_period('M')).size()
-
-    plt.figure(figsize=(10, 6))
-    sns.lineplot(x=monthly_counts.index.astype(str), y=monthly_counts.values, marker='o')
-    plt.title('Queries in the Latest 3 Months')
-    plt.xlabel('Month')
-    plt.ylabel('Number of Queries')
-    plt.xticks(rotation=45)
+    plt.xticks(ticks=counts.index, labels=x_labels, rotation=45)
     plt.grid(True)
     st.pyplot()
 
@@ -174,7 +163,12 @@ def dashboard_tab():
         elif time_delta_option == "3 months":
             sentiment_analysis(df, '3month', 'Month')
     with col3:
-        line_graph_latest_week(df) if time_delta_option == "1 week" else (line_graph_latest_month(df) if time_delta_option == "1 month" else line_graph_latest_3_months(df))
+        if time_delta_option == "1 week":
+            line_graph(df, 'week')
+        elif time_delta_option == "1 month":
+            line_graph(df, 'month')
+        elif time_delta_option == "3 months":
+            line_graph(df, '3months')
 
 def get_base64_encoded_image(image_path):
     with open(image_path, "rb") as img_file:
