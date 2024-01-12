@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import matplotlib.dates as mdates
+import base64
 from PIL import Image
 from pandas.tseries.offsets import DateOffset
 from datetime import timedelta
@@ -180,14 +181,31 @@ def dashboard_tab():
     with col3:
         line_graph_latest_week(df) if time_delta_option == "1 week" else (line_graph_latest_month(df) if time_delta_option == "1 month" else line_graph_latest_3_months(df))
 
+def get_base64_encoded_image(image_path):
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode('utf-8')
 
+def set_background(image_file):
+    bin_str = get_base64_encoded_image(image_file)
+    page_bg_img = f'''
+    <style>
+    .stApp {{
+        background-image: url("data:image/png;base64,{bin_str}");
+        background-size: cover;
+    }}
+    </style>
+    '''
+    st.markdown(page_bg_img, unsafe_allow_html=True)
+    
+# Call the function to add the background
+set_background('./source/background.jpg')
 
 # Initialize session state
 if 'current_tab' not in st.session_state:
     st.session_state['current_tab'] = 'Dashboard'
 
 # Load your company logo
-logo = Image.open('./devan&company.png')
+logo = Image.open('./source/devan&company.png')
 
 # Main
 main_layout()
