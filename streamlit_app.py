@@ -35,7 +35,7 @@ def create_heatmap(df, time_delta):
     df_pivot = filtered_df.pivot_table(index='day_of_week', columns='hour_group', values='timestamp', aggfunc='count', fill_value=0)
 
     # Create the heatmap
-    plt.figure(figsize=(11, 6))
+    plt.figure(figsize=(10, 7))
     sns.heatmap(df_pivot, annot=True, fmt="d", cmap="YlGnBu")
     plt.title(f"Weekly Activity Heatmap for Last {time_delta} Days")
     plt.xlabel("2-Hour Interval")
