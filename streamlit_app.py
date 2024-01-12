@@ -43,8 +43,7 @@ def create_heatmap(df, time_delta):
     plt.xlabel("2-Hour Interval")
     plt.ylabel("Day of the Week")
     plt.xticks(rotation=45)
-    st.pyplot(plt.gcf())  # plt.gcf() gets the current figure before it's cleared by st.pyplot()
-    return st.empty()
+    st.pyplot()
 
 # Function to plot weekly sentiment analysis
 def plot_weekly_sentiment_analysis(df, time_delta):
@@ -92,8 +91,7 @@ def line_graph_latest_week(df):
     plt.ylabel('Number of Queries')
     plt.xticks(rotation=45)
     plt.grid(True)
-    st.pyplot(plt.gcf())  # plt.gcf() gets the current figure before it's cleared by st.pyplot()
-    return st.empty()
+    st.pyplot()
 
 # Function for line graph of the latest month (weeks)
 def line_graph_latest_month(df):
@@ -110,8 +108,7 @@ def line_graph_latest_month(df):
     plt.ylabel('Number of Queries')
     plt.xticks(range(1, 6))
     plt.grid(True)
-    st.pyplot(plt.gcf())  # plt.gcf() gets the current figure before it's cleared by st.pyplot()
-    return st.empty()
+    st.pyplot()
 
 # Function for line graph of the latest 3 months (months)
 def line_graph_latest_3_months(df):
@@ -127,8 +124,7 @@ def line_graph_latest_3_months(df):
     plt.ylabel('Number of Queries')
     plt.xticks(rotation=45)
     plt.grid(True)
-    st.pyplot(plt.gcf())  # plt.gcf() gets the current figure before it's cleared by st.pyplot()
-    return st.empty()
+    st.pyplot()
 
 # Function to plot bar chart
 def plot_bar_chart(data, xlabel):
@@ -145,7 +141,6 @@ def plot_bar_chart(data, xlabel):
     plt.legend()
     plt.tight_layout()
     st.pyplot()
-    return st.empty()
 
 # UI Layout
 def main_layout():
