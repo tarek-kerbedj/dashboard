@@ -1,5 +1,4 @@
 import streamlit as st
-import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -8,7 +7,6 @@ import matplotlib.dates as mdates
 import base64
 from PIL import Image
 from pandas.tseries.offsets import DateOffset
-from datetime import timedelta
 
 # Enable wide mode
 st.set_page_config(layout="wide")
@@ -45,7 +43,6 @@ def create_heatmap(df, time_delta):
     plt.xticks(rotation=45)
     st.pyplot()
 
-
 def plot_bar_chart(data, title, xlabel, ylabel='Count'):
     """
     Plots a bar chart using the data provided.
@@ -54,14 +51,16 @@ def plot_bar_chart(data, title, xlabel, ylabel='Count'):
     :param xlabel: X-axis label
     :param ylabel: Y-axis label
     """
-    plt.figure(figsize=(10, 6))
-    data.plot(kind='bar', stacked=False)
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    st.pyplot()
+    # Create a new figure and axis for the plot
+    fig, ax = plt.subplots(figsize=(10, 6))
+    data.plot(kind='bar', stacked=False, ax=ax)
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_xticklabels(data.index, rotation=45)
+    ax.legend()
+    st.pyplot(fig)  # Pass the figure to st.pyplot() instead of relying on the current figure
+
 
 def sentiment_analysis(df, period, period_title):
     """
