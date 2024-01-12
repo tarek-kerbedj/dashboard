@@ -167,14 +167,14 @@ def dashboard_tab():
     with col1:
         create_heatmap(df, time_delta)
     with col2:
-        if time_delta_option == "1 week":
+        if time_delta_option == "7 days":
             sentiment_analysis(df, 'week', 'Day of the Week')
-        elif time_delta_option == "1 month":
+        elif time_delta_option == "30 days":
             sentiment_analysis(df, 'month', 'Week of the Month')
-        elif time_delta_option == "3 months":
+        elif time_delta_option == "90 days":
             sentiment_analysis(df, '3month', 'Month')
     with col3:
-        line_graph_latest_week(df) if time_delta_option == "1 week" else (line_graph_latest_month(df) if time_delta_option == "1 month" else line_graph_latest_3_months(df))
+        line_graph_latest_week(df) if time_delta_option == "7 days" else (line_graph_latest_month(df) if time_delta_option == "30 days" else line_graph_latest_3_months(df))
 
 def get_base64_encoded_image(image_path):
     with open(image_path, "rb") as img_file:
