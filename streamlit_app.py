@@ -90,7 +90,11 @@ def line_graph_latest_week(df):
     plt.ylabel('Number of Queries')
     plt.xticks(rotation=45)
     plt.grid(True)
-    st.pyplot()
+    # Ensure st.pyplot() is the last line in the function
+    st.pyplot(plt.gcf())  # plt.gcf() gets the current figure before it's cleared by st.pyplot()
+    plt.clf()  # Clear the figure to prevent reuse
+    return st.empty()  # Return an empty placeholder to prevent 'None' from being rendered
+
 
 # Function for line graph of the latest month (weeks)
 def line_graph_latest_month(df):
@@ -107,7 +111,11 @@ def line_graph_latest_month(df):
     plt.ylabel('Number of Queries')
     plt.xticks(range(1, 6))
     plt.grid(True)
-    st.pyplot()
+    # Ensure st.pyplot() is the last line in the function
+    st.pyplot(plt.gcf())  # plt.gcf() gets the current figure before it's cleared by st.pyplot()
+    plt.clf()  # Clear the figure to prevent reuse
+    return st.empty()  # Return an empty placeholder to prevent 'None' from being rendered
+
 
 # Function for line graph of the latest 3 months (months)
 def line_graph_latest_3_months(df):
@@ -123,7 +131,10 @@ def line_graph_latest_3_months(df):
     plt.ylabel('Number of Queries')
     plt.xticks(rotation=45)
     plt.grid(True)
-    st.pyplot()
+    # Ensure st.pyplot() is the last line in the function
+    st.pyplot(plt.gcf())  # plt.gcf() gets the current figure before it's cleared by st.pyplot()
+    plt.clf()  # Clear the figure to prevent reuse
+    return st.empty()  # Return an empty placeholder to prevent 'None' from being rendered
 
 # Function to plot bar chart
 def plot_bar_chart(data, xlabel):
