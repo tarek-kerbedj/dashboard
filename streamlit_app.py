@@ -160,7 +160,7 @@ def conversation_tab():
 
 def dashboard_tab():
     st.subheader("Dashboard")
-    time_delta_option = st.selectbox("Select days", ["7 days", "30 days", "90 days"],label_visibility=st.session_state.visibility, disabled=st.session_state.disabled)
+    time_delta_option = st.selectbox("Select Time Period", ["7 days", "30 days", "90 days"])
     time_delta = {"7 days": 7, "30 days": 30, "90 days": 90}[time_delta_option]
 
     col1, col2, col3 = st.columns(3)
