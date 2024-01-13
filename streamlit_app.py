@@ -118,7 +118,7 @@ def get_start_date(end_date, period):
     else:
         return None
 
-def users_queries(df, period):
+def users_queries_line_graph(df, period):
     end_date = df['timestamp'].max()
 
     if period == 'week':
@@ -147,23 +147,21 @@ def users_queries(df, period):
         users_per_period = period_data.groupby(period_data['timestamp'].dt.to_period('M'))['user_id'].nunique()
 
     plt.figure(figsize=(10, 6))
-    bars_queries = plt.barh(y_labels, queries_per_period, label='Number of Queries', color='blue', alpha=0.5)
-    bars_users = plt.barh(y_labels, users_per_period, label='Number of Users', color='red', alpha=0.5)
-    
-    # Annotate the bars with their respective counts
-    for bar_queries, bar_users in zip(bars_queries, bars_users):
-        width_queries = bar_queries.get_width()
-        width_users = bar_users.get_width()
-        plt.annotate(f'{width_queries}', xy=(width_queries, bar_queries.get_y() + bar_queries.get_height() / 2),
-                     xytext=(3, 0), textcoords='offset points', ha='left', va='center', color='black')
-        plt.annotate(f'{width_users}', xy=(width_users, bar_users.get_y() + bar_users.get_height() / 2),
-                     xytext=(3, 0), textcoords='offset points', ha='left', va='center', color='black')
+
+    # Plotting the line graphs or scatter plots
+    plt.plot(y_labels, queries_per_period, label='Number of Queries', color='blue', marker='o')
+    plt.plot(y_labels, users_per_period, label='Number of Users', color='red', marker='o')
+
+    # Adding annotations (optional)
+    for label, qp, up in zip(y_labels, queries_per_period, users_per_period):
+        plt.annotate(f'{qp}', (label, qp), textcoords="offset points", xytext=(0,10), ha='center')
+        plt.annotate(f'{up}', (label, up), textcoords="offset points", xytext=(0,10), ha='center')
 
     plt.title(f'Queries and Users in the Latest {period.capitalize()}')
-    plt.ylabel('Time Period')  # Adjusted y-axis label
-    plt.xlabel('Count')
-    
-    plt.legend(loc='upper left', bbox_to_anchor=(0.7, 1.0))  # Adjust legend position
+    plt.xlabel('Time Period')
+    plt.ylabel('Count')
+
+    plt.legend(loc='upper left', bbox_to_anchor=(0.7, 1.0))
     plt.grid(True)
     st.pyplot()
 
@@ -229,7 +227,6 @@ def plot_error_types_distribution(df, time_period):
 
     # Set x-tick labels according to the time period
     if time_period == '1W':
-        ax.set_xticks(range(len(days_order)))  # This sets 7 ticks corresponding to the days of the week
         ax.set_xticklabels(days_order, rotation=90)
     elif time_period == '3M':
         # The labels are already in the right format for '3M'
@@ -330,7 +327,6 @@ def plot_three_months_response_time(three_months_data):
     plt.xticks(rotation=45)
     st.pyplot()
 
-
 # UI Layout
 def main_layout():
     with st.sidebar:
@@ -385,11 +381,11 @@ def dashboard_tab():
     col1c, col2c = st.columns(2)
     with col1c:
         if time_delta_option == "1 week":
-            users_queries(df, 'week')
+            users_queries_line_graph(df, 'week')
         elif time_delta_option == "1 month":
-            users_queries(df, 'month')
+            users_queries_line_graph(df, 'month')
         elif time_delta_option == "3 months":
-            users_queries(df, '3months')
+            users_queries_line_graph(df, '3months')
     with col2c:
         if time_delta_option == "1 week":
             plot_error_types_distribution(df, time_period='1W')
