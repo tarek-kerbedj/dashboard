@@ -16,8 +16,7 @@ st.set_page_config(layout="wide")
 df = pd.read_csv('./data/chat_data.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
-# Modify the create_heatmap function
-def create_heatmap(df, time_delta):
+def create_heatmap(df, time_delta, title):
     # Filter data for the specified time period
     end_date = df['timestamp'].max()
     start_date = end_date - pd.Timedelta(days=time_delta)
@@ -36,9 +35,9 @@ def create_heatmap(df, time_delta):
     df_pivot = filtered_df.pivot_table(index='day_of_week', columns='hour_group', values='timestamp', aggfunc='count', fill_value=0)
 
     # Create the heatmap
-    plt.figure(figsize=(10, 7))
+    plt.figure(figsize=(12, 8))
     sns.heatmap(df_pivot, annot=True, fmt="d", cmap="YlGnBu")
-    plt.title(f"Weekly Activity Heatmap for Last {time_delta} Days")
+    plt.title(title)
     plt.xlabel("2-Hour Interval")
     plt.ylabel("Day of the Week")
     plt.xticks(rotation=45)
@@ -119,51 +118,50 @@ def get_start_date(end_date, period):
     else:
         return None
 
-def line_graph(df, period):
+def users_queries(df, period):
     end_date = df['timestamp'].max()
-    start_date = get_start_date(end_date, period)
 
     if period == 'week':
-        period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
-        counts = period_data.groupby(period_data['timestamp'].dt.date).size()
-        counts.index = pd.to_datetime(counts.index)
-        x_labels = counts.index.strftime('%A')
-        
-        # Calculate the number of users per day
-        users_per_day = period_data.groupby(period_data['timestamp'].dt.date)['user_id'].nunique()
-
+        start_date = end_date - pd.DateOffset(days=6)
     elif period == 'month':
-        period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
-        period_data['week_of_month'] = period_data['timestamp'].apply(lambda x: (x.day - 1) // 7 + 1)
-        counts = period_data.groupby('week_of_month').size()
-        x_labels = range(1, 6)
-        
-        # Calculate the number of users per week
-        users_per_week = period_data.groupby('week_of_month')['user_id'].nunique()
-
+        start_date = end_date - pd.DateOffset(weeks=3)
     elif period == '3months':
-        period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
-        counts = period_data.groupby(period_data['timestamp'].dt.to_period('M')).size()
-        counts.index = counts.index.to_timestamp()
-        x_labels = counts.index.strftime('%Y-%m')
-        
-        # Calculate the number of users per month
-        users_per_month = period_data.groupby(period_data['timestamp'].dt.to_period('M'))['user_id'].nunique()
+        end_date_month = end_date.replace(day=1)
+        start_date = end_date_month - pd.DateOffset(months=2)
+    else:
+        return None
+
+    period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
+
+    if period == 'week':
+        x_labels = period_data['timestamp'].dt.strftime('%A').unique()
+        queries_per_period = period_data.groupby(period_data['timestamp'].dt.date).size()
+        users_per_period = period_data.groupby(period_data['timestamp'].dt.date)['user_id'].nunique()
+    elif period == 'month':
+        x_labels = ["Week1", "Week2", "Week3", "Week4"]
+        queries_per_period = period_data.groupby('week_of_month').size()
+        users_per_period = period_data.groupby('week_of_month')['user_id'].nunique()
+    elif period == '3months':
+        x_labels = period_data['timestamp'].dt.strftime('%Y-%m').unique()
+        queries_per_period = period_data.groupby(period_data['timestamp'].dt.to_period('M')).size()
+        users_per_period = period_data.groupby(period_data['timestamp'].dt.to_period('M'))['user_id'].nunique()
 
     plt.figure(figsize=(10, 6))
-    plt.plot(counts.index, counts.values, marker='o', label='Number of Queries', linestyle='-', color='blue')
+    bars_queries = plt.bar(x_labels, queries_per_period, label='Number of Queries', color='blue', alpha=0.5)
+    bars_users = plt.bar(x_labels, users_per_period, label='Number of Users', color='red', alpha=0.5)
+    
+    # Annotate the bars with their respective counts
+    for bar_queries, bar_users in zip(bars_queries, bars_users):
+        height_queries = bar_queries.get_height()
+        height_users = bar_users.get_height()
+        plt.annotate(f'{height_queries}', xy=(bar_queries.get_x() + bar_queries.get_width() / 2, height_queries),
+                     xytext=(0, 3), textcoords='offset points', ha='center', va='bottom', color='black')
+        plt.annotate(f'{height_users}', xy=(bar_users.get_x() + bar_users.get_width() / 2, height_users),
+                     xytext=(0, 3), textcoords='offset points', ha='center', va='bottom', color='black')
+
     plt.title(f'Queries and Users in the Latest {period.capitalize()}')
     plt.xlabel('Time Period')
     plt.ylabel('Count')
-    plt.xticks(ticks=counts.index, labels=x_labels, rotation=45)
-    
-    # Plot the number of users on the same graph
-    if period == 'week':
-        plt.plot(users_per_day.index, users_per_day.values, marker='s', linestyle='--', color='red', label='Number of Users')
-    elif period == 'month':
-        plt.plot(users_per_week.index, users_per_week.values, marker='s', linestyle='--', color='red', label='Number of Users')
-    elif period == '3months':
-        plt.plot(users_per_month.index, users_per_month.values, marker='s', linestyle='--', color='red', label='Number of Users')
     
     plt.legend(loc='upper left', bbox_to_anchor=(0.7, 1.0))  # Adjust legend position
     plt.grid(True)
@@ -263,13 +261,13 @@ def plot_average_response_time(df, time_period):
 
     # Based on the time period, plot the relevant graph
     if time_period == '1 week':
-        plot_weekly_data(week_data)
+        plot_weekly_response_time(week_data)
     elif time_period == '1 month':
-        plot_monthly_data(month_data)
+        plot_monthly_response_time(month_data)
     elif time_period == '3 months':
-        plot_three_months_data(three_months_data)
+        plot_three_months_response_time(three_months_data)
 
-def plot_weekly_data(week_data):
+def plot_weekly_response_time(week_data):
     # Group data by day
     week_data_grouped = week_data.groupby(week_data['timestamp'].dt.day_name())['response_time'].mean().reindex(
         ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
@@ -283,7 +281,7 @@ def plot_weekly_data(week_data):
     plt.xticks(rotation=45)
     st.pyplot()
 
-def plot_monthly_data(month_data):
+def plot_monthly_response_time(month_data):
     # Group data by week
     month_data['week_of_month'] = month_data['timestamp'].dt.isocalendar().week
     month_data_grouped = month_data.groupby('week_of_month')['response_time'].mean()
@@ -296,7 +294,7 @@ def plot_monthly_data(month_data):
     plt.ylabel('Average Response Time (seconds)')
     st.pyplot()
 
-def plot_three_months_data(three_months_data):
+def plot_three_months_response_time(three_months_data):
     # Group data by month
     three_months_data['month_year'] = three_months_data['timestamp'].dt.strftime('%B %Y')
     three_months_data_grouped = three_months_data.groupby('month_year')['response_time'].mean()
@@ -346,11 +344,17 @@ def dashboard_tab():
         st.empty()
     with col6a:
         time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
-        time_delta = {"1 week": 7, "1 month": 30, "3 months": 90}[time_delta_option]
 
     col1b, col2b = st.columns(2)
     with col1b:
-        create_heatmap(df, time_delta)
+        # Display heatmap based on the selected time period
+        if time_delta_option == "1 week":
+            create_heatmap(df, 7, "User Activity Heatmap for Last 7 Days")
+        elif time_delta_option == "1 month":
+            create_heatmap(df, 28, "User Activity Heatmap for Last Month")
+        elif time_delta_option == "3 months":
+            create_heatmap(df, 84, "User Activity Heatmap for Last 3 Months")
+
     with col2b:
         if time_delta_option == "1 week":
             sentiment_analysis(df, 'week', 'Day of the Week')
@@ -361,11 +365,11 @@ def dashboard_tab():
     col1c, col2c = st.columns(2)
     with col1c:
         if time_delta_option == "1 week":
-            line_graph(df, 'week')
+            users_queries(df, 'week')
         elif time_delta_option == "1 month":
-            line_graph(df, 'month')
+            users_queries(df, 'month')
         elif time_delta_option == "3 months":
-            line_graph(df, '3months')
+            users_queries(df, '3months')
     with col2c:
         if time_delta_option == "1 week":
             plot_error_types_distribution(df, time_period='1W')
