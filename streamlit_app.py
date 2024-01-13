@@ -52,26 +52,24 @@ def sentiment_analysis(df, period, period_title):
     """
     # Get the most recent date in your dataset
     end_date = df['timestamp'].max()
-    start_date = end_date - pd.Timedelta(days=6)  # Calculate the start date for the last 7 days
 
-    # Filter the DataFrame for the last 7 days
-    recent_week_df = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
-
-    # Adjust the pivot table generation based on the period
+    # Define the start_date based on the period
     if period == 'week':
-        # Aggregate data over the last 7 days
-        pivot_data = recent_week_df.pivot_table(columns='sentiment', values='timestamp', aggfunc='count').sum().to_frame().T
+        start_date = end_date - pd.Timedelta(days=6)
     elif period == 'month':
-        # Here, instead of using day, use week of the month for grouping
-        df['week_of_month'] = df['timestamp'].dt.isocalendar().week - df['timestamp'].dt.isocalendar().week.min() + 1
-        pivot_data = df.pivot_table(index='week_of_month', columns='sentiment', values='timestamp', aggfunc='count').head(4)  # Limit to the first 4 weeks
-
+        start_date = end_date - pd.Timedelta(days=30)
     elif period == '3month':
-        df['month_year'] = df['timestamp'].dt.to_period('M')
-        pivot_data = df.pivot_table(index='month_year', columns='sentiment', values='timestamp', aggfunc='count').iloc[-3:]
+        start_date = end_date - pd.Timedelta(days=90)
 
-    # Convert pivot_data to a format suitable for radar chart
-    categories = list(pivot_data.columns)
+    # Filter the DataFrame for the selected period
+    filtered_df = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
+
+    # Aggregate data
+    sentiment_counts = filtered_df.groupby('sentiment')['timestamp'].count()
+    avg_sentiment_counts = sentiment_counts / len(filtered_df['timestamp'].unique())
+
+    # Convert to a format suitable for radar chart
+    categories = list(avg_sentiment_counts.index)
     N = len(categories)
 
     # Calculate the angles for the radar chart
@@ -81,12 +79,13 @@ def sentiment_analysis(df, period, period_title):
     # Radar chart setup
     fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
 
-    # Draw one axe per sentiment
-    for idx, row in pivot_data.iterrows():
-        values = row.tolist()
-        values += values[:1]  # Repeat the first value to close the circle
-        ax.plot(angles, values, linewidth=1, linestyle='solid', label=idx)
-        ax.fill(angles, values, alpha=0.2)
+    # Values for radar chart
+    values = avg_sentiment_counts.tolist()
+    values += values[:1]  # Repeat the first value to close the circle
+
+    # Draw the radar chart
+    ax.plot(angles, values, linewidth=1, linestyle='solid')
+    ax.fill(angles, values, alpha=0.2)
 
     # Add labels with emojis for each sentiment
     emoji_dict = {
@@ -94,15 +93,13 @@ def sentiment_analysis(df, period, period_title):
         "Neutral": "😐",
         "Negative": "😢",
     }
-
-    labels = [emoji_dict.get(cat, cat) for cat in categories]  # Replace category with emoji if available
+    labels = [emoji_dict.get(cat, cat) for cat in categories]
 
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(labels)  # Use labels with emojis
 
-    # Add legend and title
-    plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
-    plt.title(f'Sentiment Analysis ({period_title})')
+    # Add title
+    plt.title(f'Average Sentiment Analysis ({period_title})')
 
     # Display the chart
     st.pyplot(fig)
@@ -138,6 +135,8 @@ def users_queries_line_graph(df, period):
         queries_per_period = period_data.groupby(period_data['timestamp'].dt.date).size()
         users_per_period = period_data.groupby(period_data['timestamp'].dt.date)['user_id'].nunique()
     elif period == 'month':
+        # Calculate the week of the month
+        period_data['week_of_month'] = period_data['timestamp'].apply(lambda x: (x.day - 1) // 7 + 1)
         y_labels = ["Week1", "Week2", "Week3", "Week4"]
         queries_per_period = period_data.groupby('week_of_month').size()
         users_per_period = period_data.groupby('week_of_month')['user_id'].nunique()
@@ -391,6 +390,7 @@ def dashboard_tab():
             sentiment_analysis(df, 'month', 'For Latest Month')
         elif time_delta_option == "3 months":
             sentiment_analysis(df, '3month', 'For Latest 3 Months')
+            
     col1c, col2c = st.columns(2)
     with col1c:
         if time_delta_option == "1 week":
