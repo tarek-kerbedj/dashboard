@@ -3,8 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-from math import pi
 import base64
+from datetime import timedelta
+from math import pi
 from PIL import Image
 from pandas.tseries.offsets import DateOffset
 
@@ -118,7 +119,6 @@ def get_start_date(end_date, period):
     else:
         return None
 
-# Updated line_graph function
 def line_graph(df, period):
     end_date = df['timestamp'].max()
     start_date = get_start_date(end_date, period)
@@ -229,6 +229,73 @@ def plot_error_types_distribution(df, time_period):
     plt.tight_layout()
     st.pyplot()
 
+def plot_average_response_time(df, time_period):
+    # Calculate the response time
+    df['response_time'] = df['timestamp'].diff().fillna(pd.Timedelta(seconds=0)).dt.total_seconds()
+
+    # Define the time frames for analysis
+    latest_date = df['timestamp'].max().date()
+    one_week_ago = latest_date - timedelta(weeks=1)
+    one_month_ago = latest_date.replace(day=1) - timedelta(days=1)  # The start of the current month
+    three_months_ago = latest_date.replace(day=1) - pd.DateOffset(months=2)  # The start of the month three months ago
+
+    # Filter data for each time frame
+    week_data = df[(df['timestamp'].dt.date > one_week_ago) & (df['timestamp'].dt.date <= latest_date)]
+    month_data = df[(df['timestamp'].dt.date > one_month_ago) & (df['timestamp'].dt.date <= latest_date)]
+    three_months_data = df[(df['timestamp'] >= pd.Timestamp(three_months_ago)) & (df['timestamp'] <= pd.Timestamp(latest_date))]
+
+    # Based on the time period, plot the relevant graph
+    if time_period == '1 week':
+        plot_weekly_data(week_data)
+    elif time_period == '1 month':
+        plot_monthly_data(month_data)
+    elif time_period == '3 months':
+        plot_three_months_data(three_months_data)
+
+def plot_weekly_data(week_data):
+    # Group data by day
+    week_data_grouped = week_data.groupby(week_data['timestamp'].dt.day_name())['response_time'].mean().reindex(
+        ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+
+    # Plot for average response time during the latest week
+    plt.figure(figsize=(10, 6))
+    plt.plot(week_data_grouped.index, week_data_grouped.values, marker='o', linestyle='-', color='blue')
+    plt.title('Average Response Time - Latest Week')
+    plt.xlabel('Day of the Week')
+    plt.ylabel('Average Response Time (seconds)')
+    plt.xticks(rotation=45)
+    st.pyplot()
+
+def plot_monthly_data(month_data):
+    # Group data by week
+    month_data['week_of_month'] = month_data['timestamp'].dt.isocalendar().week
+    month_data_grouped = month_data.groupby('week_of_month')['response_time'].mean()
+
+    # Plot for average response time during each week of the month
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(1, len(month_data_grouped) + 1), month_data_grouped.values, marker='o', linestyle='-', color='green')
+    plt.title('Average Response Time - Latest Month')
+    plt.xlabel('Week of the Month')
+    plt.ylabel('Average Response Time (seconds)')
+    st.pyplot()
+
+def plot_three_months_data(three_months_data):
+    # Group data by month
+    three_months_data['month_year'] = three_months_data['timestamp'].dt.strftime('%B %Y')
+    three_months_data_grouped = three_months_data.groupby('month_year')['response_time'].mean()
+
+    # Sort the months in chronological order
+    sorted_months = sorted(three_months_data_grouped.index, key=lambda x: pd.to_datetime(x))
+
+    # Plot for average response time during the latest three months
+    plt.figure(figsize=(10, 6))
+    plt.plot(sorted_months, three_months_data_grouped[sorted_months].values, marker='o', linestyle='-', color='red')
+    plt.title('Average Response Time - Latest 3 Months')
+    plt.xlabel('Month and Year')
+    plt.ylabel('Average Response Time (seconds)')
+    plt.xticks(rotation=45)
+    st.pyplot()
+
 # UI Layout
 def main_layout():
     with st.sidebar:
@@ -295,6 +362,17 @@ def dashboard_tab():
         
         elif time_delta_option == "3 months":
             plot_error_types_distribution(df, time_period='3M')
+    
+    col1d, col2d = st.columns(2)
+    with col1d:
+        if time_delta_option == "1 week":
+            plot_average_response_time(df, '1 week')
+        elif time_delta_option == "1 month":
+            plot_average_response_time(df, '1 month')
+        elif time_delta_option == "3 months":
+            plot_average_response_time(df, '3 months')
+    with col2d:
+        st.empty()
 
 def get_base64_encoded_image(image_path):
     with open(image_path, "rb") as img_file:
