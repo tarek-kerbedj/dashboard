@@ -255,7 +255,7 @@ def conversation_tab():
     st.write(df.sort_values(by='timestamp', ascending=False))
 
 def dashboard_tab():
-    col1a, col2a, col3a = st.columns(2)
+    col1a, col2a, col3a = st.columns(3)
     with col1a:
         st.subheader("Dashboard")
     with col2a:
