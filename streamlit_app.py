@@ -418,57 +418,28 @@ def dashboard_tab():
         elif time_delta_option == "3 months":
             plot_average_response_time(df, '3 months')
 
-    current_date = pd.to_datetime('now')
-    end_date = current_date
     with col2d:
-        if time_delta_option == "1 week":
-            # Your existing code for users_queries_line_graph
-            users_queries_line_graph(df, 'week')
-            # Calculate and display the total number of users for the latest week
-            total_users = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]['user_id'].nunique()
-            st.markdown(f"Total Users (Latest Week): {total_users}")
+        # Calculate the number of unique users and total number of queries
+        num_users = df['user_id'].nunique()
+        num_queries = len(df)
 
-        elif time_delta_option == "1 month":
-            # Your existing code for users_queries_line_graph
-            users_queries_line_graph(df, 'month')
-            # Calculate start_date and end_date for the latest month
-            start_date = end_date.replace(day=1)
-            total_users = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]['user_id'].nunique()
-            st.markdown(f"Total Users (Latest Month): {total_users}")
-
-        elif time_delta_option == "3 months":
-            # Your existing code for users_queries_line_graph
-            users_queries_line_graph(df, '3months')
-            # Calculate start_date and end_date for the latest 3 months
-            start_date = end_date - pd.DateOffset(months=2)
-            total_users = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]['user_id'].nunique()
-            st.markdown(f"Total Users (Latest 3 Months): {total_users}")
+        # Plot for total number of users
+        plt.figure(figsize=(6, 4))
+        plt.bar(['Total Users'], [num_users], color='green')
+        plt.title('Total Number of Users')
+        plt.ylabel('Count')
+        plt.xticks(rotation=0)
+        st.pyplot()
 
     # Inside col3d
     with col3d:
-        if time_delta_option == "1 week":
-            # Your existing code for users_queries_line_graph
-            users_queries_line_graph(df, 'week')
-            # Calculate and display the total number of queries for the latest week
-            total_queries = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)].shape[0]
-            st.markdown(f"Total Queries (Latest Week): {total_queries}")
-
-        elif time_delta_option == "1 month":
-            # Your existing code for users_queries_line_graph
-            users_queries_line_graph(df, 'month')
-            # Calculate start_date and end_date for the latest month
-            start_date = end_date.replace(day=1)
-            total_queries = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)].shape[0]
-            st.markdown(f"Total Queries (Latest Month): {total_queries}")
-
-        elif time_delta_option == "3 months":
-            # Your existing code for users_queries_line_graph
-            users_queries_line_graph(df, '3months')
-            # Calculate start_date and end_date for the latest 3 months
-            start_date = end_date - pd.DateOffset(months=2)
-            total_queries = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)].shape[0]
-            st.markdown(f"Total Queries (Latest 3 Months): {total_queries}")
-
+        # Plot for total number of queries
+        plt.figure(figsize=(6, 4))
+        plt.bar(['Total Queries'], [num_queries], color='orange')
+        plt.title('Total Number of Queries')
+        plt.ylabel('Count')
+        plt.xticks(rotation=0)
+        st.pyplot()
 
 def get_base64_encoded_image(image_path):
     with open(image_path, "rb") as img_file:
