@@ -421,25 +421,25 @@ def dashboard_tab():
     with col2d:
         if time_delta_option == "1 week":
             users_count = df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=1)]['user_id'].nunique()
-            st.text(f'Total Users (Last 1 Week): {users_count}')
+            st.info(f'Total Users (Last 1 Week): {users_count}')
         elif time_delta_option == "1 month":
             users_count = df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=4)]['user_id'].nunique()
-            st.text(f'Total Users (Last 1 Month): {users_count}')
+            st.info(f'Total Users (Last 1 Month): {users_count}')
         elif time_delta_option == "3 months":
             users_count = df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=12)]['user_id'].nunique()
-            st.text(f'Total Users (Last 3 Months): {users_count}')
+            st.info(f'Total Users (Last 3 Months): {users_count}')
 
     # Inside col3d
     with col3d:
         if time_delta_option == "1 week":
             queries_count = len(df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=1)])
-            st.text(f'Total Queries (Last 1 Week): {queries_count}')
+            st.info(f'Total Queries (Last 1 Week): {queries_count}')
         elif time_delta_option == "1 month":
             queries_count = len(df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=4)])
-            st.text(f'Total Queries (Last 1 Month): {queries_count}')
+            st.info(f'Total Queries (Last 1 Month): {queries_count}')
         elif time_delta_option == "3 months":
             queries_count = len(df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=12)])
-            st.text(f'Total Queries (Last 3 Months): {queries_count}')
+            st.info(f'Total Queries (Last 3 Months): {queries_count}')
 
 def get_base64_encoded_image(image_path):
     with open(image_path, "rb") as img_file:
