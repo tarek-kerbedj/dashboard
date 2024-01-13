@@ -169,20 +169,19 @@ def users_queries(df, period):
 
 def plot_error_types_distribution(df, time_period):
     # Set time period start and end dates
-    end_date = df['timestamp'].max()
+    end_date = df['timestamp'].max().date()
+    
     if time_period == '1W':
-        start_date = end_date - pd.DateOffset(days=6)
+        start_date = end_date - pd.DateOffset(days=7)
     elif time_period == '1M':
-        start_date = pd.Timestamp(end_date) - pd.DateOffset(weeks=4)  # Convert to Timestamp and adjust to 4 weeks
+        start_date = end_date - pd.DateOffset(weeks=4)  # Adjusted to 4 weeks
     elif time_period == '3M':
-        start_date = pd.Timestamp(end_date) - pd.DateOffset(months=3)  # Convert to Timestamp and adjust to 3 complete months
-
-    # Convert start_date to datetime
-    start_date = pd.Timestamp(start_date)
+        # Calculate the end date for the 3-month period
+        start_date = end_date - pd.DateOffset(weeks=12)  # 12 weeks for 3 months
+        start_date = start_date.replace(day=1)  # Start from the 1st day of the month
 
     # Filter data for the specified time period
-    time_period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
-
+    time_period_data = df[(df['timestamp'] >= pd.Timestamp(start_date)) & (df['timestamp'] <= pd.Timestamp(end_date))]
 
     # Determine the appropriate grouping and title based on time period
     if time_period == '1W':
@@ -228,8 +227,9 @@ def plot_error_types_distribution(df, time_period):
     plt.title(title)
     plt.legend(title='Error Type', bbox_to_anchor=(1.05, 1), loc='upper left')
 
+    # Set x-tick labels according to the time period
     if time_period == '1W':
-        ax.set_xticks(range(len(days_order)))
+        ax.set_xticks(range(len(days_order)))  # This sets 7 ticks corresponding to the days of the week
         ax.set_xticklabels(days_order, rotation=90)
     elif time_period == '3M':
         # The labels are already in the right format for '3M'
@@ -274,7 +274,13 @@ def plot_weekly_response_time(week_data):
 
     # Plot for average response time during the latest week
     plt.figure(figsize=(10, 6))
-    plt.plot(week_data_grouped.index, week_data_grouped.values, marker='o', linestyle='-', color='blue')
+    bars = plt.bar(week_data_grouped.index, week_data_grouped.values, color='blue')
+
+    # Adding the text on the bars
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom', ha='center')
+
     plt.title('Average Response Time - Latest Week')
     plt.xlabel('Day of the Week')
     plt.ylabel('Average Response Time (seconds)')
@@ -288,7 +294,14 @@ def plot_monthly_response_time(month_data):
 
     # Plot for average response time during each week of the month
     plt.figure(figsize=(10, 6))
-    plt.plot(range(1, len(month_data_grouped) + 1), month_data_grouped.values, marker='o', linestyle='-', color='green')
+    weeks = range(1, len(month_data_grouped) + 1)
+    bars = plt.bar(weeks, month_data_grouped.values, color='green')
+
+    # Adding the text on the bars
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom', ha='center')
+
     plt.title('Average Response Time - Latest Month')
     plt.xlabel('Week of the Month')
     plt.ylabel('Average Response Time (seconds)')
@@ -304,12 +317,19 @@ def plot_three_months_response_time(three_months_data):
 
     # Plot for average response time during the latest three months
     plt.figure(figsize=(10, 6))
-    plt.plot(sorted_months, three_months_data_grouped[sorted_months].values, marker='o', linestyle='-', color='red')
+    bars = plt.bar(sorted_months, three_months_data_grouped[sorted_months].values, color='red')
+
+    # Adding the text on the bars
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom', ha='center')
+
     plt.title('Average Response Time - Latest 3 Months')
     plt.xlabel('Month and Year')
     plt.ylabel('Average Response Time (seconds)')
     plt.xticks(rotation=45)
     st.pyplot()
+
 
 # UI Layout
 def main_layout():
