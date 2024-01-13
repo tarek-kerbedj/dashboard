@@ -11,7 +11,6 @@ from pandas.tseries.offsets import DateOffset
 
 # Enable wide mode
 st.set_page_config(layout="wide")
-st.set_sidebar_state("collapsed")
 
 # Load data from CSV
 df = pd.read_csv('./data/chat_data.csv')
@@ -316,7 +315,7 @@ def plot_three_months_data(three_months_data):
 
 # UI Layout
 def main_layout():
-    with st.sidebar:
+    with st.sidebar("collapsed"):
         st.image(logo, width=300)
         st.title("Navigation")
         st.markdown("---")
