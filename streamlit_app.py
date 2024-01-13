@@ -417,10 +417,10 @@ def dashboard_tab():
             plot_average_response_time(df, '1 month')
         elif time_delta_option == "3 months":
             plot_average_response_time(df, '3 months')
+
+    current_date = pd.to_datetime('now')
+    end_date = current_date
     with col2d:
-        # Calculate end_date based on the current date
-        current_date = pd.to_datetime('now')
-        end_date = current_date
         if time_delta_option == "1 week":
             # Your existing code for users_queries_line_graph
             users_queries_line_graph(df, 'week')
