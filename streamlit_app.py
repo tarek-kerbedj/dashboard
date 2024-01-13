@@ -255,32 +255,34 @@ def conversation_tab():
     st.write(df.sort_values(by='timestamp', ascending=False))
 
 def dashboard_tab():
-    col1, col2 = st.columns(2)
-    with col1:
+    col1a, col2a, col3a = st.columns(2)
+    with col1a:
         st.subheader("Dashboard")
-    with col2:
+    with col2a:
+        st.empty()
+    with col3a:
         time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
         time_delta = {"1 week": 7, "1 month": 30, "3 months": 90}[time_delta_option]
 
-    col3, col4 = st.columns(2)
-    with col3:
+    col1b, col2b = st.columns(2)
+    with col1b:
         create_heatmap(df, time_delta)
-    with col4:
+    with col2b:
         if time_delta_option == "1 week":
             sentiment_analysis(df, 'week', 'Day of the Week')
         elif time_delta_option == "1 month":
             sentiment_analysis(df, 'month', 'Week of the Month')
         elif time_delta_option == "3 months":
             sentiment_analysis(df, '3month', 'Month')
-    col5, col6 = st.columns(2)
-    with col5:
+    col1c, col2c = st.columns(2)
+    with col1c:
         if time_delta_option == "1 week":
             line_graph(df, 'week')
         elif time_delta_option == "1 month":
             line_graph(df, 'month')
         elif time_delta_option == "3 months":
             line_graph(df, '3months')
-    with col6:
+    with col2c:
         if time_delta_option == "1 week":
             plot_error_types_distribution(df, time_period='1W')
 
