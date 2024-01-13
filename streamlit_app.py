@@ -285,23 +285,36 @@ def plot_weekly_response_time(week_data):
     st.pyplot()
 
 def plot_monthly_response_time(month_data):
-    # Group data by week
-    month_data['week_of_month'] = month_data['timestamp'].dt.isocalendar().week
-    month_data_grouped = month_data.groupby('week_of_month')['response_time'].mean()
+    # Calculate the start of the month
+    start_of_month = month_data['timestamp'].min().replace(day=1)
 
-    # Plot for average response time during each week of the month
+    # Calculate the end of the fourth week from the start of the month
+    end_of_fourth_week = start_of_month + timedelta(weeks=4) - timedelta(days=1)
+
+    # Filter data to include only the days within the first four weeks of the month
+    month_data_filtered = month_data[(month_data['timestamp'] >= start_of_month) & 
+                                     (month_data['timestamp'] <= end_of_fourth_week)]
+
+    # Calculate the week number within the month
+    month_data_filtered['week_of_month'] = month_data_filtered['timestamp'].apply(
+        lambda x: (x - start_of_month).days // 7 + 1)
+
+    # Group data by week within the month
+    month_data_grouped = month_data_filtered.groupby('week_of_month')['response_time'].mean()
+
+    # Plot for average response time during each week of the latest month
     plt.figure(figsize=(10, 6))
-    weeks = range(1, len(month_data_grouped) + 1)
-    bars = plt.bar(weeks, month_data_grouped.values, color='green')
+    bars = plt.bar(month_data_grouped.index, month_data_grouped.values, color='green')
 
     # Adding the text on the bars
     for bar in bars:
         yval = bar.get_height()
         plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom', ha='center')
 
-    plt.title('Average Response Time - Latest Month')
+    plt.title('Average Response Time - First 4 Weeks of the Month')
     plt.xlabel('Week of the Month')
     plt.ylabel('Average Response Time (seconds)')
+    plt.xticks(range(1, 5))
     st.pyplot()
 
 def plot_three_months_response_time(three_months_data):
