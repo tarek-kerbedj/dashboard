@@ -11,12 +11,13 @@ from pandas.tseries.offsets import DateOffset
 
 # Enable wide mode
 st.set_page_config(layout="wide")
+st.set_sidebar_state("collapsed")
 
 # Load data from CSV
 df = pd.read_csv('./data/chat_data.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
-# Define function to create heatmap for given time delta
+# Modify the create_heatmap function
 def create_heatmap(df, time_delta):
     # Filter data for the specified time period
     end_date = df['timestamp'].max()
@@ -172,55 +173,72 @@ def line_graph(df, period):
 def plot_error_types_distribution(df, time_period):
     # Set time period start and end dates
     end_date = df['timestamp'].max()
-    
     if time_period == '1W':
         start_date = end_date - pd.DateOffset(days=6)
     elif time_period == '1M':
-        start_date = end_date - pd.DateOffset(days=30)
+        start_date = pd.Timestamp(end_date) - pd.DateOffset(weeks=4)  # Convert to Timestamp and adjust to 4 weeks
     elif time_period == '3M':
-        start_date = end_date - pd.DateOffset(months=2)
+        start_date = pd.Timestamp(end_date) - pd.DateOffset(months=3)  # Convert to Timestamp and adjust to 3 complete months
 
-    # Convert start_date to Timestamp
+    # Convert start_date to datetime
     start_date = pd.Timestamp(start_date)
 
     # Filter data for the specified time period
     time_period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
+
 
     # Determine the appropriate grouping and title based on time period
     if time_period == '1W':
         days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         grouping_column = time_period_data['timestamp'].dt.strftime('%A')
         title = 'Error Types Distribution Over the Last 7 Days'
-        xlabel = 'Count'
-        ylabel = 'Day of the Week'
+        xlabel = 'Day of the Week'
+        ylabel = 'Count'
     elif time_period == '1M':
-        num_weeks = (time_period_data['timestamp'].dt.day - 1).max() // 7 + 1
-        grouping_column = (time_period_data['timestamp'].dt.day - 1) // 7 + 1
-        title = 'Error Types Distribution Over the Last 1 Month'
-        xlabel = 'Count'
-        ylabel = 'Weeks of the Month'
+        # Calculate week number within the month
+        time_period_data['week_number'] = time_period_data['timestamp'].apply(lambda x: (x.day - 1) // 7 + 1)
+        time_period_data['week_number'] = time_period_data['week_number'].apply(lambda x: min(x, 4))
+        grouping_column = 'week_number'
+        title = 'Error Types Distribution Over the Last 4 Weeks'
+        xlabel = 'Weeks of the Month'
+        ylabel = 'Count'
     elif time_period == '3M':
-        grouping_column = time_period_data['timestamp'].dt.strftime('%B %Y')
+        # Format 'month_year' to show the name of the month and year
+        time_period_data['month_year'] = time_period_data['timestamp'].dt.strftime('%B %Y')
+        grouping_column = 'month_year'
         title = 'Error Types Distribution Over the Last 3 Months'
-        xlabel = 'Count'
-        ylabel = 'Month'
+        xlabel = 'Month'
+        ylabel = 'Count'
 
-    # Group by 'type_of_error' and count each type for the specified time period
+    # Create a pivot table and sort if it's for the '3M' time period
     error_counts = time_period_data.pivot_table(index=grouping_column, columns='type_of_error', values='error', aggfunc='sum', fill_value=0)
 
-    # Create a horizontal stacked bar chart for the error types
+    if time_period == '3M':
+        # Convert the index to datetime to sort it
+        error_counts.index = pd.to_datetime(error_counts.index, format='%B %Y')
+        error_counts.sort_index(inplace=True)
+        # Convert back to month names for display
+        error_counts.index = error_counts.index.strftime('%B %Y')
+
+    # Create a vertical stacked bar chart for the error types
     plt.figure(figsize=(12, 6))
     sns.set_palette("Set2")  # Use a color palette
-    ax = error_counts.plot(kind='barh', stacked=True)
+    ax = error_counts.plot(kind='bar', stacked=True)
 
-    plt.title(title)
+    # Swapping the labels for the vertical orientation
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
+    plt.title(title)
     plt.legend(title='Error Type', bbox_to_anchor=(1.05, 1), loc='upper left')
 
     if time_period == '1W':
-        ax.set_yticks(range(len(days_order)))  # Set ticks for all days
-        ax.set_yticklabels(days_order)  # Set correct order of days
+        ax.set_xticks(range(len(days_order)))
+        ax.set_xticklabels(days_order, rotation=90)
+    elif time_period == '3M':
+        # The labels are already in the right format for '3M'
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+    else:
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
 
     # Remove top and right spines
     ax.spines['top'].set_visible(False)
