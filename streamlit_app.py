@@ -134,34 +134,34 @@ def users_queries(df, period):
     period_data = df[(df['timestamp'] >= start_date) & (df['timestamp'] <= end_date)]
 
     if period == 'week':
-        x_labels = period_data['timestamp'].dt.strftime('%A').unique()
+        y_labels = period_data['timestamp'].dt.strftime('%A').unique()
         queries_per_period = period_data.groupby(period_data['timestamp'].dt.date).size()
         users_per_period = period_data.groupby(period_data['timestamp'].dt.date)['user_id'].nunique()
     elif period == 'month':
-        x_labels = ["Week1", "Week2", "Week3", "Week4"]
+        y_labels = ["Week1", "Week2", "Week3", "Week4"]
         queries_per_period = period_data.groupby('week_of_month').size()
         users_per_period = period_data.groupby('week_of_month')['user_id'].nunique()
     elif period == '3months':
-        x_labels = period_data['timestamp'].dt.strftime('%Y-%m').unique()
+        y_labels = period_data['timestamp'].dt.strftime('%Y-%m').unique()
         queries_per_period = period_data.groupby(period_data['timestamp'].dt.to_period('M')).size()
         users_per_period = period_data.groupby(period_data['timestamp'].dt.to_period('M'))['user_id'].nunique()
 
     plt.figure(figsize=(10, 6))
-    bars_queries = plt.bar(x_labels, queries_per_period, label='Number of Queries', color='blue', alpha=0.5)
-    bars_users = plt.bar(x_labels, users_per_period, label='Number of Users', color='red', alpha=0.5)
+    bars_queries = plt.barh(y_labels, queries_per_period, label='Number of Queries', color='blue', alpha=0.5)
+    bars_users = plt.barh(y_labels, users_per_period, label='Number of Users', color='red', alpha=0.5)
     
     # Annotate the bars with their respective counts
     for bar_queries, bar_users in zip(bars_queries, bars_users):
-        height_queries = bar_queries.get_height()
-        height_users = bar_users.get_height()
-        plt.annotate(f'{height_queries}', xy=(bar_queries.get_x() + bar_queries.get_width() / 2, height_queries),
-                     xytext=(0, 3), textcoords='offset points', ha='center', va='bottom', color='black')
-        plt.annotate(f'{height_users}', xy=(bar_users.get_x() + bar_users.get_width() / 2, height_users),
-                     xytext=(0, 3), textcoords='offset points', ha='center', va='bottom', color='black')
+        width_queries = bar_queries.get_width()
+        width_users = bar_users.get_width()
+        plt.annotate(f'{width_queries}', xy=(width_queries, bar_queries.get_y() + bar_queries.get_height() / 2),
+                     xytext=(3, 0), textcoords='offset points', ha='left', va='center', color='black')
+        plt.annotate(f'{width_users}', xy=(width_users, bar_users.get_y() + bar_users.get_height() / 2),
+                     xytext=(3, 0), textcoords='offset points', ha='left', va='center', color='black')
 
     plt.title(f'Queries and Users in the Latest {period.capitalize()}')
-    plt.xlabel('Time Period')
-    plt.ylabel('Count')
+    plt.ylabel('Time Period')  # Adjusted y-axis label
+    plt.xlabel('Count')
     
     plt.legend(loc='upper left', bbox_to_anchor=(0.7, 1.0))  # Adjust legend position
     plt.grid(True)
@@ -357,11 +357,11 @@ def dashboard_tab():
 
     with col2b:
         if time_delta_option == "1 week":
-            sentiment_analysis(df, 'week', 'Day of the Week')
+            sentiment_analysis(df, 'week', 'For Latest Week')
         elif time_delta_option == "1 month":
-            sentiment_analysis(df, 'month', 'Week of the Month')
+            sentiment_analysis(df, 'month', 'For Latest Month')
         elif time_delta_option == "3 months":
-            sentiment_analysis(df, '3month', 'Month')
+            sentiment_analysis(df, '3month', 'For Latest 3 Months')
     col1c, col2c = st.columns(2)
     with col1c:
         if time_delta_option == "1 week":
