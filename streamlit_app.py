@@ -383,17 +383,20 @@ def dashboard_tab():
     with col6a:
         time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
 
-    col1b, col2b = st.columns(2)
+    col1b, col2b, col3b = st.columns(3)
+    # Latest date in the dataset
+    latest_date = df['timestamp'].max()
     with col1b:
-        # Display heatmap based on the selected time period
-        if time_delta_option == "1 week":
-            create_heatmap(df, 7, "User Activity Heatmap for Last 7 Days")
-        elif time_delta_option == "1 month":
-            create_heatmap(df, 28, "User Activity Heatmap for Last Month")
-        elif time_delta_option == "3 months":
-            create_heatmap(df, 84, "User Activity Heatmap for Last 3 Months")
+        st.header("Total Users")
+        users_count, delta_users, _, _ = calculate_metrics_delta(df, latest_date, time_delta_option)
+        st.metric(label=f"Total Users - Last {time_delta_option}", value=users_count, delta=f"{delta_users}")
 
     with col2b:
+        st.header("Total Queries")
+        _, _, queries_count, delta_queries = calculate_metrics_delta(df, latest_date, time_delta_option)
+        st.metric(label=f"Total Queries - Last {time_delta_option}", value=queries_count, delta=f"{delta_queries}")
+    
+    with col3b:
         if time_delta_option == "1 week":
             sentiment_analysis(df, 'week', 'For Latest Week')
         elif time_delta_option == "1 month":
@@ -419,7 +422,7 @@ def dashboard_tab():
         elif time_delta_option == "3 months":
             plot_error_types_distribution(df, time_period='3M')
     
-    col1d, col2d, col3d = st.columns(3)
+    col1d, col2d = st.columns(2)
     with col1d:
         if time_delta_option == "1 week":
             plot_average_response_time(df, '1 week')
@@ -428,19 +431,14 @@ def dashboard_tab():
         elif time_delta_option == "3 months":
             plot_average_response_time(df, '3 months')
 
-    # Latest date in the dataset
-    latest_date = df['timestamp'].max()
-
     with col2d:
-        st.header("Total Users")
-        users_count, delta_users, _, _ = calculate_metrics_delta(df, latest_date, time_delta_option)
-        st.metric(label=f"Total Users - Last {time_delta_option}", value=users_count, delta=f"{delta_users}")
-
-    with col3d:
-        st.header("Total Queries")
-        _, _, queries_count, delta_queries = calculate_metrics_delta(df, latest_date, time_delta_option)
-        st.metric(label=f"Total Queries - Last {time_delta_option}", value=queries_count, delta=f"{delta_queries}")
-
+        # Display heatmap based on the selected time period
+        if time_delta_option == "1 week":
+            create_heatmap(df, 7, "User Activity Heatmap for Last 7 Days")
+        elif time_delta_option == "1 month":
+            create_heatmap(df, 28, "User Activity Heatmap for Last Month")
+        elif time_delta_option == "3 months":
+            create_heatmap(df, 84, "User Activity Heatmap for Last 3 Months")
 
 def get_base64_encoded_image(image_path):
     with open(image_path, "rb") as img_file:
