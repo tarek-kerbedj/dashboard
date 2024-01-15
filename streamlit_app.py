@@ -8,10 +8,7 @@ from datetime import timedelta
 from math import pi
 from PIL import Image
 from pandas.tseries.offsets import DateOffset
-from datetime import datetime
-
-# Enable wide mode
-st.set_page_config(layout="wide")
+from st_on_hover_tabs import on_hover_tabs
 
 # Load data from CSV
 df = pd.read_csv('./data/chat_data.csv')
@@ -341,46 +338,55 @@ def calculate_metrics_delta(df, latest_date, period):
     return current_users_count, delta_users, current_queries_count, delta_queries
 
 
-# UI Layout
 def main_layout():
+    if 'current_tab' not in st.session_state:
+        st.session_state['current_tab'] = 'Dashboard'
+
+    st.markdown('<style>' + open('./style.css').read() + '</style>', unsafe_allow_html=True)
+
     with st.sidebar:
-        st.image(logo, width=300)
-        st.title("Navigation")
-        st.markdown("---")
+        # Load and display the logo
+        logo = Image.open('./source/devan&company.png')
+        st.image(logo, use_column_width=True)
 
-        if st.button("📊 Dashboard"):
+        # Tab selection
+        tabs = on_hover_tabs(tabName=['Dashboard', 'Conversation'], 
+                             iconName=['dashboard', 'chat'], 
+                             styles = {'navtab': {'background-color':'#111',
+                                                  'color': '#818181',
+                                                  'font-size': '18px',
+                                                  'transition': '.3s',
+                                                  'white-space': 'nowrap',
+                                                  'text-transform': 'uppercase'},
+                                       'tabOptionsStyle': {':hover :hover': {'color': 'red',
+                                                                             'cursor': 'pointer'}},
+                                       'iconStyle':{'position':'fixed',
+                                                    'left':'7.5px',
+                                                    'text-align': 'left'},
+                                       'tabStyle' : {'list-style-type': 'none',
+                                                     'margin-bottom': '30px',
+                                                     'padding-left': '30px'}},
+                             key="1")
+
+        # Set the current tab based on selection
+        if tabs == 'Dashboard':
             st.session_state['current_tab'] = 'Dashboard'
-        if st.button("💬 Conversation"):
+        elif tabs == 'Conversation':
             st.session_state['current_tab'] = 'Conversation'
-
-        st.markdown("---")
-        st.markdown("## About")
-        st.info("Devan & Company's data scientists and analysts are trained experts in analyzing, cleaning and transforming your data to create models that highlight the most relevant information pertaining to your business.")
 
     if st.session_state['current_tab'] == 'Conversation':
         conversation_tab()
     elif st.session_state['current_tab'] == 'Dashboard':
         dashboard_tab()
 
-def conversation_tab():
-    st.subheader("Chat")
-    
-    # Define the columns you want to display
-    columns_to_display = ['timestamp', 'user_id', 'user_message', 'bot_response']
-    
-    # Create a subset of the DataFrame with the selected columns
-    subset_df = df[columns_to_display]
-    
-    # Display the subset of the DataFrame
-    st.write(subset_df.sort_values(by='timestamp', ascending=False))
 
 def dashboard_tab():
-    col1a, col2a, col3a, col4a, col5a, col6a = st.columns(6)
+    col1a, col2a, col3a, col4a, col5a = st.columns(5)
     with col1a:
         st.subheader("Dashboard")
     with col2a, col3a, col4a, col5a:
         st.empty()
-    with col6a:
+    with col5a:
         time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
 
     col1b, col2b, col3b = st.columns(3)
@@ -394,7 +400,7 @@ def dashboard_tab():
     with col2b:
         st.header("Total Queries")
         _, _, queries_count, delta_queries = calculate_metrics_delta(df, latest_date, time_delta_option)
-        st.metric(label=f"Last {time_delta_option}", value=queries_count, delta=f"{delta_queries}")
+        st.metric(label=f"Total Queries - Last {time_delta_option}", value=queries_count, delta=f"{delta_queries}")
     
     with col3b:
         if time_delta_option == "1 week":
@@ -440,28 +446,36 @@ def dashboard_tab():
         elif time_delta_option == "3 months":
             create_heatmap(df, 84, "User Activity Heatmap for Last 3 Months")
 
-def get_base64_encoded_image(image_path):
-    with open(image_path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode('utf-8')
+def conversation_tab():
+    st.subheader("Chat")
+    
+    # Define the columns you want to display
+    columns_to_display = ['timestamp', 'user_id', 'user_message', 'bot_response']
+    
+    # Create a subset of the DataFrame with the selected columns
+    subset_df = df[columns_to_display]
+    
+    # Display the subset of the DataFrame
+    st.write(subset_df.sort_values(by='timestamp', ascending=False))
 
-def set_background(image_file):
-    bin_str = get_base64_encoded_image(image_file)
-    page_bg_img = f'''
-    <style>
-    .stApp {{
-        background-image: url("data:image/png;base64,{bin_str}");
-        background-size: cover;
-    }}
-    </style>
-    '''
-    st.markdown(page_bg_img, unsafe_allow_html=True)
+# def get_base64_encoded_image(image_path):
+#     with open(image_path, "rb") as img_file:
+#         return base64.b64encode(img_file.read()).decode('utf-8')
+
+# def set_background(image_file):
+#     bin_str = get_base64_encoded_image(image_file)
+#     page_bg_img = f'''
+#     <style>
+#     .stApp {{
+#         background-image: url("data:image/png;base64,{bin_str}");
+#         background-size: cover;
+#     }}
+#     </style>
+#     '''
+#     st.markdown(page_bg_img, unsafe_allow_html=True)
     
 # Call the function to add the background
-set_background('./source/background.jpg')
-
-# Initialize session state
-if 'current_tab' not in st.session_state:
-    st.session_state['current_tab'] = 'Dashboard'
+# set_background('./source/background.jpg')
 
 # Load your company logo
 logo = Image.open('./source/devan&company.png')
