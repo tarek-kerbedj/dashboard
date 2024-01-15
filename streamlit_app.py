@@ -338,55 +338,46 @@ def calculate_metrics_delta(df, latest_date, period):
     return current_users_count, delta_users, current_queries_count, delta_queries
 
 
+# UI Layout
 def main_layout():
-    if 'current_tab' not in st.session_state:
-        st.session_state['current_tab'] = 'Dashboard'
-
-    st.markdown('<style>' + open('./style.css').read() + '</style>', unsafe_allow_html=True)
-
     with st.sidebar:
-        # Load and display the logo
-        logo = Image.open('./source/devan&company.png')
-        st.image(logo, use_column_width=True)
+        st.image(logo, width=300)
+        st.title("Navigation")
+        st.markdown("---")
 
-        # Tab selection
-        tabs = on_hover_tabs(tabName=['Dashboard', 'Conversation'], 
-                             iconName=['dashboard', 'chat'], 
-                             styles = {'navtab': {'background-color':'#111',
-                                                  'color': '#818181',
-                                                  'font-size': '18px',
-                                                  'transition': '.3s',
-                                                  'white-space': 'nowrap',
-                                                  'text-transform': 'uppercase'},
-                                       'tabOptionsStyle': {':hover :hover': {'color': 'red',
-                                                                             'cursor': 'pointer'}},
-                                       'iconStyle':{'position':'fixed',
-                                                    'left':'7.5px',
-                                                    'text-align': 'left'},
-                                       'tabStyle' : {'list-style-type': 'none',
-                                                     'margin-bottom': '30px',
-                                                     'padding-left': '30px'}},
-                             key="1")
-
-        # Set the current tab based on selection
-        if tabs == 'Dashboard':
+        if st.button("📊 Dashboard"):
             st.session_state['current_tab'] = 'Dashboard'
-        elif tabs == 'Conversation':
+        if st.button("💬 Conversation"):
             st.session_state['current_tab'] = 'Conversation'
+
+        st.markdown("---")
+        st.markdown("## About")
+        st.info("Devan & Company's data scientists and analysts are trained experts in analyzing, cleaning and transforming your data to create models that highlight the most relevant information pertaining to your business.")
 
     if st.session_state['current_tab'] == 'Conversation':
         conversation_tab()
     elif st.session_state['current_tab'] == 'Dashboard':
         dashboard_tab()
 
+def conversation_tab():
+    st.subheader("Chat")
+    
+    # Define the columns you want to display
+    columns_to_display = ['timestamp', 'user_id', 'user_message', 'bot_response']
+    
+    # Create a subset of the DataFrame with the selected columns
+    subset_df = df[columns_to_display]
+    
+    # Display the subset of the DataFrame
+    st.write(subset_df.sort_values(by='timestamp', ascending=False))
 
 def dashboard_tab():
-    col1a, col2a, col3a, col4a, col5a = st.columns(5)
+    col1a, col2a, col3a, col4a, col5a, col6a = st.columns(6)
     with col1a:
         st.subheader("Dashboard")
     with col2a, col3a, col4a, col5a:
         st.empty()
-    with col5a:
+    with col6a:
         time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
 
     col1b, col2b, col3b = st.columns(3)
@@ -446,36 +437,28 @@ def dashboard_tab():
         elif time_delta_option == "3 months":
             create_heatmap(df, 84, "User Activity Heatmap for Last 3 Months")
 
-def conversation_tab():
-    st.subheader("Chat")
-    
-    # Define the columns you want to display
-    columns_to_display = ['timestamp', 'user_id', 'user_message', 'bot_response']
-    
-    # Create a subset of the DataFrame with the selected columns
-    subset_df = df[columns_to_display]
-    
-    # Display the subset of the DataFrame
-    st.write(subset_df.sort_values(by='timestamp', ascending=False))
+def get_base64_encoded_image(image_path):
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode('utf-8')
 
-# def get_base64_encoded_image(image_path):
-#     with open(image_path, "rb") as img_file:
-#         return base64.b64encode(img_file.read()).decode('utf-8')
-
-# def set_background(image_file):
-#     bin_str = get_base64_encoded_image(image_file)
-#     page_bg_img = f'''
-#     <style>
-#     .stApp {{
-#         background-image: url("data:image/png;base64,{bin_str}");
-#         background-size: cover;
-#     }}
-#     </style>
-#     '''
-#     st.markdown(page_bg_img, unsafe_allow_html=True)
+def set_background(image_file):
+    bin_str = get_base64_encoded_image(image_file)
+    page_bg_img = f'''
+    <style>
+    .stApp {{
+        background-image: url("data:image/png;base64,{bin_str}");
+        background-size: cover;
+    }}
+    </style>
+    '''
+    st.markdown(page_bg_img, unsafe_allow_html=True)
     
 # Call the function to add the background
-# set_background('./source/background.jpg')
+set_background('./source/background.jpg')
+
+# Initialize session state
+if 'current_tab' not in st.session_state:
+    st.session_state['current_tab'] = 'Dashboard'
 
 # Load your company logo
 logo = Image.open('./source/devan&company.png')
