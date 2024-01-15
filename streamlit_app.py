@@ -8,6 +8,7 @@ from datetime import timedelta
 from math import pi
 from PIL import Image
 from pandas.tseries.offsets import DateOffset
+from datetime import datetime
 
 # Enable wide mode
 st.set_page_config(layout="wide")
@@ -317,6 +318,29 @@ def plot_three_months_response_time(three_months_data):
     plt.xticks(rotation=45)
     st.pyplot()
 
+def calculate_metrics_delta(df, latest_date, period):
+    if period == "1 week":
+        current_period_start = latest_date - pd.DateOffset(weeks=1)
+        previous_period_start = latest_date - pd.DateOffset(weeks=2)
+    elif period == "1 month":
+        current_period_start = latest_date - pd.DateOffset(months=1)
+        previous_period_start = latest_date - pd.DateOffset(months=2)
+    elif period == "3 months":
+        current_period_start = latest_date - pd.DateOffset(months=3)
+        previous_period_start = latest_date - pd.DateOffset(months=6)
+
+    current_users_count = df[(df['timestamp'] >= current_period_start) & (df['timestamp'] <= latest_date)]['user_id'].nunique()
+    previous_users_count = df[(df['timestamp'] >= previous_period_start) & (df['timestamp'] < current_period_start)]['user_id'].nunique()
+
+    current_queries_count = df[(df['timestamp'] >= current_period_start) & (df['timestamp'] <= latest_date)].shape[0]
+    previous_queries_count = df[(df['timestamp'] >= previous_period_start) & (df['timestamp'] < current_period_start)].shape[0]
+
+    delta_users = current_users_count - previous_users_count
+    delta_queries = current_queries_count - previous_queries_count
+
+    return current_users_count, delta_users, current_queries_count, delta_queries
+
+
 # UI Layout
 def main_layout():
     with st.sidebar:
@@ -403,26 +427,20 @@ def dashboard_tab():
             plot_average_response_time(df, '1 month')
         elif time_delta_option == "3 months":
             plot_average_response_time(df, '3 months')
+
+    # Latest date in the dataset
+    latest_date = df['timestamp'].max()
+
     with col2d:
-        if time_delta_option == "1 week":
-            users_count = df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=1)]['user_id'].nunique()
-            st.info(f'Total Users (Last 1 Week): {users_count}')
-        elif time_delta_option == "1 month":
-            users_count = df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=4)]['user_id'].nunique()
-            st.info(f'Total Users (Last 1 Month): {users_count}')
-        elif time_delta_option == "3 months":
-            users_count = df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=12)]['user_id'].nunique()
-            st.info(f'Total Users (Last 3 Months): {users_count}')
+        st.header("Total Users")
+        users_count, delta_users, _, _ = calculate_metrics_delta(df, latest_date, time_delta_option)
+        st.metric(label=f"Total Users - Last {time_delta_option}", value=users_count, delta=f"{delta_users}")
+
     with col3d:
-        if time_delta_option == "1 week":
-            queries_count = len(df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=1)])
-            st.info(f'Total Queries (Last 1 Week): {queries_count}')
-        elif time_delta_option == "1 month":
-            queries_count = len(df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=4)])
-            st.info(f'Total Queries (Last 1 Month): {queries_count}')
-        elif time_delta_option == "3 months":
-            queries_count = len(df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=12)])
-            st.info(f'Total Queries (Last 3 Months): {queries_count}')
+        st.header("Total Queries")
+        _, _, queries_count, delta_queries = calculate_metrics_delta(df, latest_date, time_delta_option)
+        st.metric(label=f"Total Queries - Last {time_delta_option}", value=queries_count, delta=f"{delta_queries}")
+
 
 def get_base64_encoded_image(image_path):
     with open(image_path, "rb") as img_file:
