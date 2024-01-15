@@ -362,7 +362,15 @@ def main_layout():
 
 def conversation_tab():
     st.subheader("Chat")
-    st.write(df.sort_values(by='timestamp', ascending=False))
+    
+    # Define the columns you want to display
+    columns_to_display = ['timestamp', 'user_id', 'user_message', 'bot_response']
+    
+    # Create a subset of the DataFrame with the selected columns
+    subset_df = df[columns_to_display]
+    
+    # Display the subset of the DataFrame
+    st.write(subset_df.sort_values(by='timestamp', ascending=False))
 
 def dashboard_tab():
     col1a, col2a, col3a, col4a, col5a, col6a = st.columns(6)
@@ -409,7 +417,7 @@ def dashboard_tab():
         elif time_delta_option == "3 months":
             plot_error_types_distribution(df, time_period='3M')
     
-    col1d, col2d, col3d = st.columns(3)
+    col1d, col2d = st.columns(2)
     with col1d:
         if time_delta_option == "1 week":
             plot_average_response_time(df, '1 week')
@@ -417,29 +425,8 @@ def dashboard_tab():
             plot_average_response_time(df, '1 month')
         elif time_delta_option == "3 months":
             plot_average_response_time(df, '3 months')
-
     with col2d:
-        if time_delta_option == "1 week":
-            users_count = df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=1)]['user_id'].nunique()
-            st.success(f'Total Users (Last 1 Week): {users_count}')
-        elif time_delta_option == "1 month":
-            users_count = df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=4)]['user_id'].nunique()
-            st.success(f'Total Users (Last 1 Month): {users_count}')
-        elif time_delta_option == "3 months":
-            users_count = df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=12)]['user_id'].nunique()
-            st.success(f'Total Users (Last 3 Months): {users_count}')
-
-    # Inside col3d
-    with col3d:
-        if time_delta_option == "1 week":
-            queries_count = len(df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=1)])
-            st.success(f'Total Queries (Last 1 Week): {queries_count}')
-        elif time_delta_option == "1 month":
-            queries_count = len(df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=4)])
-            st.success(f'Total Queries (Last 1 Month): {queries_count}')
-        elif time_delta_option == "3 months":
-            queries_count = len(df[df['timestamp'] >= df['timestamp'].max() - pd.DateOffset(weeks=12)])
-            st.success(f'Total Queries (Last 3 Months): {queries_count}')
+        st.empty()
 
 def get_base64_encoded_image(image_path):
     with open(image_path, "rb") as img_file:
