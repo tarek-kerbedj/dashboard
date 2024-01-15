@@ -8,7 +8,6 @@ from datetime import timedelta
 from math import pi
 from PIL import Image
 from pandas.tseries.offsets import DateOffset
-from st_on_hover_tabs import on_hover_tabs
 
 # Load data from CSV
 df = pd.read_csv('./data/chat_data.csv')
