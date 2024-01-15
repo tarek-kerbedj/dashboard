@@ -9,6 +9,8 @@ from math import pi
 from PIL import Image
 from pandas.tseries.offsets import DateOffset
 
+st.set_page_config(layout="wide")
+
 # Load data from CSV
 df = pd.read_csv('./data/chat_data.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
@@ -339,7 +341,6 @@ def calculate_metrics_delta(df, latest_date, period):
 
 # UI Layout
 def main_layout():
-    st.set_page_config(layout="wide")
     with st.sidebar:
         st.image(logo, width=300)
         st.title("Menu")
