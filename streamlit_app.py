@@ -389,12 +389,12 @@ def dashboard_tab():
     with col1b:
         st.header("Total Users")
         users_count, delta_users, _, _ = calculate_metrics_delta(df, latest_date, time_delta_option)
-        st.metric(label=f"Total Users - Last {time_delta_option}", value=users_count, delta=f"{delta_users}")
+        st.metric(label=f"Last {time_delta_option}", value=users_count, delta=f"{delta_users}")
 
     with col2b:
         st.header("Total Queries")
         _, _, queries_count, delta_queries = calculate_metrics_delta(df, latest_date, time_delta_option)
-        st.metric(label=f"Total Queries - Last {time_delta_option}", value=queries_count, delta=f"{delta_queries}")
+        st.metric(label=f"Last {time_delta_option}", value=queries_count, delta=f"{delta_queries}")
     
     with col3b:
         if time_delta_option == "1 week":
