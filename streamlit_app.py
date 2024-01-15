@@ -339,9 +339,10 @@ def calculate_metrics_delta(df, latest_date, period):
 
 # UI Layout
 def main_layout():
+    st.set_page_config(layout="wide")
     with st.sidebar:
         st.image(logo, width=300)
-        st.title("Navigation")
+        st.title("Menu")
         st.markdown("---")
 
         if st.button("📊 Dashboard"):
