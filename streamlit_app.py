@@ -438,24 +438,24 @@ def dashboard_tab():
         elif time_delta_option == "3 months":
             create_heatmap(df, 84, "User Activity Heatmap for Last 3 Months")
 
-def get_base64_encoded_image(image_path):
-    with open(image_path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode('utf-8')
+# def get_base64_encoded_image(image_path):
+#     with open(image_path, "rb") as img_file:
+#         return base64.b64encode(img_file.read()).decode('utf-8')
 
-def set_background(image_file):
-    bin_str = get_base64_encoded_image(image_file)
-    page_bg_img = f'''
-    <style>
-    .stApp {{
-        background-image: url("data:image/png;base64,{bin_str}");
-        background-size: cover;
-    }}
-    </style>
-    '''
-    st.markdown(page_bg_img, unsafe_allow_html=True)
+# def set_background(image_file):
+#     bin_str = get_base64_encoded_image(image_file)
+#     page_bg_img = f'''
+#     <style>
+#     .stApp {{
+#         background-image: url("data:image/png;base64,{bin_str}");
+#         background-size: cover;
+#     }}
+#     </style>
+#     '''
+#     st.markdown(page_bg_img, unsafe_allow_html=True)
     
-# Call the function to add the background
-set_background('./source/background.jpg')
+# # Call the function to add the background
+# set_background('./source/background.jpg')
 
 # Initialize session state
 if 'current_tab' not in st.session_state:
