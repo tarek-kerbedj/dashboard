@@ -3,15 +3,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-import base64
 from datetime import timedelta
 from math import pi
 from PIL import Image
-from pandas.tseries.offsets import DateOffset
 
 st.set_page_config(layout="wide")
 
-# Load data from CSV
 df = pd.read_csv('./data/chat_data.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
@@ -102,17 +99,6 @@ def sentiment_analysis(df, period, period_title):
 
     # Display the chart
     st.pyplot(fig)
-    
-# Utility function to get start date based on time period
-def get_start_date(end_date, period):
-    if period == 'week':
-        return end_date - DateOffset(days=7)
-    elif period == 'month':
-        return end_date - DateOffset(months=1)
-    elif period == '3months':
-        return end_date - DateOffset(months=3)
-    else:
-        return None
 
 def users_queries_line_graph(df, period):
     end_date = df['timestamp'].max()
@@ -327,7 +313,6 @@ def calculate_metrics_delta(df, latest_date, period):
 
     return current_users_count, delta_users, current_queries_count, delta_queries
 
-# UI Layout
 def main_layout():
     with st.sidebar:
         st.image(logo, width=300)
@@ -363,7 +348,7 @@ def conversation_tab():
 def dashboard_tab():
     col1a, col2a, col3a, col4a, col5a = st.columns(5)
     with col1a:
-        st.subheader("Dashboard")
+        st.header("Dashboard")
     with col2a, col3a, col4a, col5a:
         st.empty()
     with col5a:
@@ -373,12 +358,12 @@ def dashboard_tab():
     # Latest date in the dataset
     latest_date = df['timestamp'].max()
     with col1b:
-        st.header("Total Users")
+        st.subheader("Total Users")
         users_count, delta_users, _, _ = calculate_metrics_delta(df, latest_date, time_delta_option)
         st.metric(label=f"Last {time_delta_option}", value=users_count, delta=f"{delta_users}")
 
     with col2b:
-        st.header("Total Queries")
+        st.subheader("Total Queries")
         _, _, queries_count, delta_queries = calculate_metrics_delta(df, latest_date, time_delta_option)
         st.metric(label=f"Total Queries - Last {time_delta_option}", value=queries_count, delta=f"{delta_queries}")
     
@@ -430,8 +415,6 @@ def dashboard_tab():
 if 'current_tab' not in st.session_state:
     st.session_state['current_tab'] = 'Dashboard'
 
-# Load your company logo
 logo = Image.open('./source/devan&company.png')
 
-# Main
 main_layout()
