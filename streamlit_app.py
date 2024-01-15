@@ -255,64 +255,53 @@ def plot_average_response_time(df, time_period):
 
     # Plot the relevant graph
     if time_period == '1 week':
-        plot_weekly_response_time(week_data)
+        # Group data by day
+        week_data_grouped = week_data.groupby(week_data['timestamp'].dt.day_name())['response_time'].mean().reindex(
+            ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+
+        # Plot for average response time during the latest week
+        plt.figure(figsize=(10, 6))
+        bars = plt.bar(week_data_grouped.index, week_data_grouped.values, color='blue')
+        for bar in bars:
+            yval = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom', ha='center')
+        plt.title('Average Response Time - Latest Week')
+        plt.xlabel('Day of the Week')
+        plt.ylabel('Average Response Time (seconds)')
     elif time_period == '1 month':
-        plot_monthly_response_time(month_data)
+        # Calculate the start of the month
+        start_of_month = month_data['timestamp'].min().replace(day=1)
+        end_of_fourth_week = start_of_month + timedelta(weeks=4) - timedelta(days=1)
+        month_data_filtered = month_data[(month_data['timestamp'] >= start_of_month) & 
+                                        (month_data['timestamp'] <= end_of_fourth_week)]
+        month_data_filtered['week_of_month'] = month_data_filtered['timestamp'].apply(
+            lambda x: (x - start_of_month).days // 7 + 1)
+        month_data_grouped = month_data_filtered.groupby('week_of_month')['response_time'].mean()
+        plt.figure(figsize=(10, 6))
+        bars = plt.bar(month_data_grouped.index, month_data_grouped.values, color='green')
+        for bar in bars:
+            yval = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom', ha='center')
+        plt.title('Average Response Time - First 4 Weeks of the Month')
+        plt.xlabel('Week of the Month')
+        plt.ylabel('Average Response Time (seconds)')
+        plt.xticks(range(1, 5))
     elif time_period == '3 months':
-        plot_three_months_response_time(three_months_data)
+        # Group data by month
+        three_months_data['month_year'] = three_months_data['timestamp'].dt.strftime('%B %Y')
+        three_months_data_grouped = three_months_data.groupby('month_year')['response_time'].mean()
+        sorted_months = sorted(three_months_data_grouped.index, key=lambda x: pd.to_datetime(x))
 
-def plot_weekly_response_time(week_data):
-    # Group data by day
-    week_data_grouped = week_data.groupby(week_data['timestamp'].dt.day_name())['response_time'].mean().reindex(
-        ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+        # Plot for average response time during the latest three months
+        plt.figure(figsize=(10, 6))
+        bars = plt.bar(sorted_months, three_months_data_grouped[sorted_months].values, color='red')
+        for bar in bars:
+            yval = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom', ha='center')
+        plt.title('Average Response Time - Latest 3 Months')
+        plt.xlabel('Month and Year')
+        plt.ylabel('Average Response Time (seconds)')
 
-    # Plot for average response time during the latest week
-    plt.figure(figsize=(10, 6))
-    bars = plt.bar(week_data_grouped.index, week_data_grouped.values, color='blue')
-    for bar in bars:
-        yval = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom', ha='center')
-    plt.title('Average Response Time - Latest Week')
-    plt.xlabel('Day of the Week')
-    plt.ylabel('Average Response Time (seconds)')
-    plt.xticks(rotation=45)
-    st.pyplot()
-
-def plot_monthly_response_time(month_data):
-    # Calculate the start of the month
-    start_of_month = month_data['timestamp'].min().replace(day=1)
-    end_of_fourth_week = start_of_month + timedelta(weeks=4) - timedelta(days=1)
-    month_data_filtered = month_data[(month_data['timestamp'] >= start_of_month) & 
-                                     (month_data['timestamp'] <= end_of_fourth_week)]
-    month_data_filtered['week_of_month'] = month_data_filtered['timestamp'].apply(
-        lambda x: (x - start_of_month).days // 7 + 1)
-    month_data_grouped = month_data_filtered.groupby('week_of_month')['response_time'].mean()
-    plt.figure(figsize=(10, 6))
-    bars = plt.bar(month_data_grouped.index, month_data_grouped.values, color='green')
-    for bar in bars:
-        yval = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom', ha='center')
-    plt.title('Average Response Time - First 4 Weeks of the Month')
-    plt.xlabel('Week of the Month')
-    plt.ylabel('Average Response Time (seconds)')
-    plt.xticks(range(1, 5))
-    st.pyplot()
-
-def plot_three_months_response_time(three_months_data):
-    # Group data by month
-    three_months_data['month_year'] = three_months_data['timestamp'].dt.strftime('%B %Y')
-    three_months_data_grouped = three_months_data.groupby('month_year')['response_time'].mean()
-    sorted_months = sorted(three_months_data_grouped.index, key=lambda x: pd.to_datetime(x))
-
-    # Plot for average response time during the latest three months
-    plt.figure(figsize=(10, 6))
-    bars = plt.bar(sorted_months, three_months_data_grouped[sorted_months].values, color='red')
-    for bar in bars:
-        yval = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom', ha='center')
-    plt.title('Average Response Time - Latest 3 Months')
-    plt.xlabel('Month and Year')
-    plt.ylabel('Average Response Time (seconds)')
     plt.xticks(rotation=45)
     st.pyplot()
 
@@ -337,7 +326,6 @@ def calculate_metrics_delta(df, latest_date, period):
     delta_queries = current_queries_count - previous_queries_count
 
     return current_users_count, delta_users, current_queries_count, delta_queries
-
 
 # UI Layout
 def main_layout():
