@@ -371,12 +371,12 @@ def conversation_tab():
     st.write(subset_df.sort_values(by='timestamp', ascending=False))
 
 def dashboard_tab():
-    col1a, col2a, col3a, col4a, col5a, col6a = st.columns(6)
+    col1a, col2a, col3a, col4a, col5a = st.columns(5)
     with col1a:
         st.subheader("Dashboard")
     with col2a, col3a, col4a, col5a:
         st.empty()
-    with col6a:
+    with col5a:
         time_delta_option = st.selectbox("Select Time Period", ["1 week", "1 month", "3 months"])
 
     col1b, col2b, col3b = st.columns(3)
