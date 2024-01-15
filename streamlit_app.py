@@ -241,21 +241,20 @@ def plot_error_types_distribution(df, time_period):
     st.pyplot()
 
 def plot_average_response_time(df, time_period):
-    # Calculate the response time
-    df['response_time'] = df['timestamp'].diff().fillna(pd.Timedelta(seconds=0)).dt.total_seconds()
-
+    # Convert the 'timestamp' column to datetime format
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
     # Define the time frames for analysis
     latest_date = df['timestamp'].max().date()
     one_week_ago = latest_date - timedelta(weeks=1)
-    one_month_ago = latest_date.replace(day=1) - timedelta(days=1)  # The start of the current month
-    three_months_ago = latest_date.replace(day=1) - pd.DateOffset(months=2)  # The start of the month three months ago
+    one_month_ago = latest_date.replace(day=1) - timedelta(days=1)
+    three_months_ago = latest_date.replace(day=1) - pd.DateOffset(months=2)
 
     # Filter data for each time frame
     week_data = df[(df['timestamp'].dt.date > one_week_ago) & (df['timestamp'].dt.date <= latest_date)]
     month_data = df[(df['timestamp'].dt.date > one_month_ago) & (df['timestamp'].dt.date <= latest_date)]
     three_months_data = df[(df['timestamp'] >= pd.Timestamp(three_months_ago)) & (df['timestamp'] <= pd.Timestamp(latest_date))]
 
-    # Based on the time period, plot the relevant graph
+    # Plot the relevant graph
     if time_period == '1 week':
         plot_weekly_response_time(week_data)
     elif time_period == '1 month':
@@ -271,12 +270,9 @@ def plot_weekly_response_time(week_data):
     # Plot for average response time during the latest week
     plt.figure(figsize=(10, 6))
     bars = plt.bar(week_data_grouped.index, week_data_grouped.values, color='blue')
-
-    # Adding the text on the bars
     for bar in bars:
         yval = bar.get_height()
         plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom', ha='center')
-
     plt.title('Average Response Time - Latest Week')
     plt.xlabel('Day of the Week')
     plt.ylabel('Average Response Time (seconds)')
@@ -286,30 +282,17 @@ def plot_weekly_response_time(week_data):
 def plot_monthly_response_time(month_data):
     # Calculate the start of the month
     start_of_month = month_data['timestamp'].min().replace(day=1)
-
-    # Calculate the end of the fourth week from the start of the month
     end_of_fourth_week = start_of_month + timedelta(weeks=4) - timedelta(days=1)
-
-    # Filter data to include only the days within the first four weeks of the month
     month_data_filtered = month_data[(month_data['timestamp'] >= start_of_month) & 
                                      (month_data['timestamp'] <= end_of_fourth_week)]
-
-    # Calculate the week number within the month
     month_data_filtered['week_of_month'] = month_data_filtered['timestamp'].apply(
         lambda x: (x - start_of_month).days // 7 + 1)
-
-    # Group data by week within the month
     month_data_grouped = month_data_filtered.groupby('week_of_month')['response_time'].mean()
-
-    # Plot for average response time during each week of the latest month
     plt.figure(figsize=(10, 6))
     bars = plt.bar(month_data_grouped.index, month_data_grouped.values, color='green')
-
-    # Adding the text on the bars
     for bar in bars:
         yval = bar.get_height()
         plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom', ha='center')
-
     plt.title('Average Response Time - First 4 Weeks of the Month')
     plt.xlabel('Week of the Month')
     plt.ylabel('Average Response Time (seconds)')
@@ -320,19 +303,14 @@ def plot_three_months_response_time(three_months_data):
     # Group data by month
     three_months_data['month_year'] = three_months_data['timestamp'].dt.strftime('%B %Y')
     three_months_data_grouped = three_months_data.groupby('month_year')['response_time'].mean()
-
-    # Sort the months in chronological order
     sorted_months = sorted(three_months_data_grouped.index, key=lambda x: pd.to_datetime(x))
 
     # Plot for average response time during the latest three months
     plt.figure(figsize=(10, 6))
     bars = plt.bar(sorted_months, three_months_data_grouped[sorted_months].values, color='red')
-
-    # Adding the text on the bars
     for bar in bars:
         yval = bar.get_height()
         plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom', ha='center')
-
     plt.title('Average Response Time - Latest 3 Months')
     plt.xlabel('Month and Year')
     plt.ylabel('Average Response Time (seconds)')
